@@ -2,6 +2,8 @@ package funcs
 
 type Fetcher[T any] func() (T, error)
 
+// TODO: refactor the method when go 1.19 releases.
+
 func (f Fetcher[T]) Exists(p Predict[T]) bool {
 	v, err := f()
 	return err == nil && p(v)

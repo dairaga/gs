@@ -8,6 +8,8 @@ import (
 	"github.com/dairaga/gs/slices"
 )
 
+// TODO: refactor the method when go 1.19 releases.
+
 type M[K comparable, V any] map[K]V
 
 type Pair[K comparable, V any] struct {

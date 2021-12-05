@@ -5,6 +5,8 @@ import (
 	"github.com/dairaga/gs/funcs"
 )
 
+// TODO: refactor the method when go 1.19 releases.
+
 func Fold[L, R, T any](e gs.Either[L, R], left funcs.Func[L, T], right funcs.Func[R, T]) T {
 	return funcs.BuildUnit(e.Fetch, right, funcs.UnitAndThen(e.Left, left))
 }

@@ -22,6 +22,8 @@ func Id[T any](v T) Unit[T] {
 	}
 }
 
+// TODO: refactor the method when go 1.19 releases.
+
 func AndThen[T, U, R any](f Func[T, U], g Func[U, R]) Func[T, R] {
 	return func(v T) R {
 		return g(f(v))

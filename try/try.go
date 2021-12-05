@@ -5,6 +5,8 @@ import (
 	"github.com/dairaga/gs/funcs"
 )
 
+// TODO: refactor the method when go 1.19 releases.
+
 func From[T any](v T, err error) gs.Try[T] {
 	return funcs.BuildFrom(v, err, gs.Success[T], gs.Failure[T])
 }

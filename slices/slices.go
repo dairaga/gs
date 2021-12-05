@@ -501,7 +501,11 @@ func ReduceRight[T any](s S[T], op func(T, T) T) gs.Option[T] {
 
 	heads := Heads(s)
 
-	return funcs.Cond(IsEmpty(heads), last, gs.Some(FoldRight(heads, last.Get(), op)))
+	return funcs.Cond(
+		IsEmpty(heads),
+		last,
+		gs.Some(FoldRight(heads, last.Get(), op)),
+	)
 
 }
 
