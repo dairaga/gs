@@ -57,7 +57,7 @@ func Collect[K comparable, V, T any](m M[K, V], p func(K, V) (T, bool)) slices.S
 	)
 }
 
-func CollectMaPair[K1, K2 comparable, V1, V2 any](m M[K1, V1], p func(K1, V1) (K2, V2, bool)) M[K2, V2] {
+func CollectMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], p func(K1, V1) (K2, V2, bool)) M[K2, V2] {
 	return Fold(
 		m,
 		make(M[K2, V2]),
@@ -80,7 +80,7 @@ func FlatMapSlice[K comparable, V any, T any](m M[K, V], op func(K, V) slices.S[
 	)
 }
 
-func FlatMaPair[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) M[K2, V2]) M[K2, V2] {
+func FlatMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) M[K2, V2]) M[K2, V2] {
 	return Fold(
 		m,
 		make(M[K2, V2]),
@@ -103,7 +103,7 @@ func MapSlice[K comparable, V, T any](m M[K, V], op func(K, V) T) slices.S[T] {
 	)
 }
 
-func MaPair[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) (K2, V2)) M[K2, V2] {
+func Map[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) (K2, V2)) M[K2, V2] {
 	return Fold(
 		m,
 		make(M[K2, V2]),
