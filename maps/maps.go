@@ -7,8 +7,6 @@ import (
 	"github.com/dairaga/gs/slices"
 )
 
-// TODO: refactor the method when go 1.19 releases.
-
 type M[K comparable, V any] map[K]V
 
 type Pair[K comparable, V any] struct {
@@ -24,8 +22,6 @@ func P[K comparable, V any](k K, v V) Pair[K, V] {
 	}
 }
 
-// -----------------------------------------------------------------------------
-
 func From[K comparable, V any](a ...Pair[K, V]) (ret M[K, V]) {
 	ret = make(M[K, V], len(a))
 	for i := range a {
@@ -33,6 +29,10 @@ func From[K comparable, V any](a ...Pair[K, V]) (ret M[K, V]) {
 	}
 	return ret
 }
+
+// -----------------------------------------------------------------------------
+
+// TODO: refactor the method when go 1.19 releases.
 
 func Fold[K comparable, V, U any](m M[K, V], z U, op func(U, K, V) U) (ret U) {
 	ret = z
