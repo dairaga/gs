@@ -2,7 +2,6 @@ package slices
 
 import (
 	"constraints"
-	"sort"
 
 	"github.com/dairaga/gs"
 	"github.com/dairaga/gs/funcs"
@@ -52,60 +51,12 @@ func Tabulate[T any](size int, op funcs.Func[int, T]) S[T] {
 	return ret
 }
 
-func Clone[T any](s S[T]) S[T] {
-	if len(s) <= 0 {
-		return Empty[T]()
-	}
-
-	return append(Empty[T](), s...)
-}
-
-func ReverseSelf[T any](s S[T]) S[T] {
-	size := len(s)
-	half := size / 2
-
-	for i := 0; i < half; i++ {
-		tmp := s[i]
-		s[i] = s[size-1-i]
-		s[size-1-i] = tmp
-	}
-
-	return s
-}
-
-func Reverse[T any](s S[T]) (ret S[T]) {
-	ret = Clone(s)
-	return ReverseSelf(ret)
-}
-
-func IndexWhereFrom[T any](s S[T], p funcs.Predict[T], from int) int {
-	size := len(s)
-	if size <= 0 {
-		return -1
-	}
-
-	if from < 0 {
-		from = size + from
-	}
-
-	for i := from; i < size; i++ {
-		if p(s[i]) {
-			return i
-		}
-	}
-	return -1
-}
-
-func IndexWhere[T any](s S[T], p funcs.Predict[T]) int {
-	return IndexWhereFrom(s, p, 0)
-}
-
 func IndexFromFunc[T, U any](s S[T], x U, from int, eq funcs.Equal[U, T]) int {
 	p := func(v T) bool {
 		return eq(x, v)
 	}
 
-	return IndexWhereFrom(s, p, from)
+	return s.IndexWhereFrom(p, from)
 }
 
 func IndexFunc[T, U any](s S[T], x U, eq funcs.Equal[U, T]) int {
@@ -120,36 +71,12 @@ func Index[T comparable](s S[T], x T) int {
 	return IndexFrom(s, x, 0)
 }
 
-func LastIndexWhereFrom[T any](s S[T], p funcs.Predict[T], from int) int {
-	size := len(s)
-	if size <= 0 {
-		return -1
-	}
-
-	if from < 0 {
-		from = size + from
-	}
-
-	from = funcs.Min(from, size-1)
-
-	for i := from; i >= 0; i-- {
-		if p(s[i]) {
-			return i
-		}
-	}
-	return -1
-}
-
-func LastIndexWhere[T any](s S[T], p funcs.Predict[T]) int {
-	return LastIndexWhereFrom(s, p, -1)
-}
-
 func LastIndexFromFunc[T, U any](s S[T], x U, from int, eq funcs.Equal[U, T]) int {
 	p := func(v T) bool {
 		return eq(x, v)
 	}
 
-	return LastIndexWhereFrom(s, p, from)
+	return s.LastIndexWhereFrom(p, from)
 }
 
 func LastIndexFunc[T, U any](s S[T], x U, eq funcs.Equal[U, T]) int {
@@ -248,7 +175,7 @@ func ScanRight[T, U any](s S[T], z U, op func(T, U) U) (ret S[U]) {
 		return append(b, op(a, b[len(b)-1]))
 	})
 
-	ReverseSelf(ret)
+	ret.ReverseSelf()
 	return
 }
 
@@ -310,228 +237,19 @@ func GroupMapReduce[T any, K comparable, V any](s S[T], key funcs.Func[T, K], va
 	ret := make(map[K]V)
 
 	for k := range m {
-		ret[k] = Reduce(m[k], op).Get()
+		ret[k] = m[k].Reduce(op).Get()
 	}
 	return ret
 }
 
 func MaxBy[T any, R constraints.Ordered](s S[T], op funcs.Order[T, R]) gs.Option[T] {
-	return Max(s, func(a, b T) int { return funcs.Cmp(op(a), op(b)) })
+	return s.Max(func(a, b T) int { return funcs.Cmp(op(a), op(b)) })
 }
 
 func MinBy[T any, R constraints.Ordered](s S[T], op funcs.Order[T, R]) gs.Option[T] {
-	return Min(s, func(a, b T) int { return funcs.Cmp(op(a), op(b)) })
+	return s.Min(func(a, b T) int { return funcs.Cmp(op(a), op(b)) })
 }
-
-// -----------------------------------------------------------------------------
 
 func IsEmpty[T any](s S[T]) bool {
 	return len(s) <= 0
-}
-
-func Forall[T any](s S[T], p funcs.Predict[T]) bool {
-	for i := range s {
-		if !p(s[i]) {
-			return false
-		}
-	}
-	return true
-}
-
-func Exists[T any](s S[T], p funcs.Predict[T]) bool {
-	for i := range s {
-		if p(s[i]) {
-			return true
-		}
-	}
-	return false
-}
-
-func Foreach[T any](s S[T], op func(T)) {
-	for i := range s {
-		op(s[i])
-	}
-}
-
-func Head[T any](s S[T]) gs.Option[T] {
-	if IsEmpty(s) {
-		return gs.None[T]()
-	}
-	return gs.Some(s[0])
-}
-
-func Heads[T any](s S[T]) S[T] {
-	if IsEmpty(s) {
-		return s
-	}
-	return s[:len(s)-1]
-}
-
-func Last[T any](s S[T]) gs.Option[T] {
-	if IsEmpty(s) {
-		return gs.None[T]()
-	}
-	return gs.Some(s[len(s)-1])
-}
-
-func Tail[T any](s S[T]) S[T] {
-	if IsEmpty(s) {
-		return s
-	}
-	return s[1:]
-}
-
-func Filter[T any](s S[T], p funcs.Predict[T]) S[T] {
-	return Fold(s, Empty[T](), func(z S[T], v T) S[T] {
-		if p(v) {
-			z = append(z, v)
-		}
-		return z
-	})
-}
-
-func FilterNot[T any](s S[T], p funcs.Predict[T]) S[T] {
-	return Filter(s, func(v T) bool { return !p(v) })
-}
-
-func Find[T any](s S[T], p funcs.Predict[T]) gs.Option[T] {
-	pos := IndexWhere(s, p)
-	if pos >= 0 {
-		return gs.Some(s[pos])
-	}
-	return gs.None[T]()
-}
-
-func Partition[T any](s S[T], p funcs.Predict[T]) (_, _ S[T]) {
-	t2 := Fold(
-		s,
-		gs.T2(Empty[T](), Empty[T]()),
-		func(z gs.Tuple2[S[T], S[T]], x T) gs.Tuple2[S[T], S[T]] {
-			if p(x) {
-				z.V2 = append(z.V2, x)
-			} else {
-				z.V1 = append(z.V1, x)
-			}
-			return z
-		},
-	)
-	return t2.V1, t2.V2
-}
-
-func SplitAt[T any](s S[T], n int) (a, b S[T]) {
-	size := len(s)
-	if size <= 0 {
-		a, b = Empty[T](), Empty[T]()
-		return
-	}
-
-	if n < 0 {
-		n = size + n
-	}
-
-	n = funcs.Max(n, size)
-
-	return s[0:n], s[n:]
-}
-
-func Count[T any](s S[T], p funcs.Predict[T]) (ret int) {
-	for i := range s {
-		if p(s[i]) {
-			ret++
-		}
-	}
-	return
-}
-
-func Take[T any](s S[T], n int) S[T] {
-	a, b := SplitAt(s, n)
-	if n >= 0 {
-		return Clone(a)
-	}
-	return Clone(b)
-}
-
-func TakeWhile[T any](s S[T], p funcs.Predict[T]) (ret S[T]) {
-	ret = Empty[T]()
-
-	for i := range s {
-		if !p(s[i]) {
-			break
-		}
-		ret = append(ret, s[i])
-	}
-
-	return
-}
-
-func Drop[T any](s S[T], n int) S[T] {
-	a, b := SplitAt(s, n)
-	if n >= 0 {
-		return Clone(b)
-	}
-	return Clone(a)
-}
-
-func DropWhile[T any](s S[T], p funcs.Predict[T]) S[T] {
-	for i := range s {
-		if !p(s[i]) {
-			return Clone(s[i:])
-		}
-	}
-	return Empty[T]()
-}
-
-func ReduceLeft[T any](s S[T], op func(T, T) T) gs.Option[T] {
-	head := Head(s)
-	if head.IsEmpty() {
-		return head
-	}
-
-	tail := Tail(s)
-
-	return funcs.Cond(IsEmpty(tail), head, gs.Some(FoldLeft(tail, head.Get(), op)))
-
-}
-
-func ReduceRight[T any](s S[T], op func(T, T) T) gs.Option[T] {
-	last := Last(s)
-	if last.IsEmpty() {
-		return last
-	}
-
-	heads := Heads(s)
-
-	return funcs.Cond(
-		IsEmpty(heads),
-		last,
-		gs.Some(FoldRight(heads, last.Get(), op)),
-	)
-
-}
-
-func Reduce[T any](s S[T], op func(T, T) T) gs.Option[T] {
-	return ReduceLeft(s, op)
-}
-
-func Max[T any](s S[T], cmp funcs.Compare[T, T]) gs.Option[T] {
-	return Reduce(
-		s,
-		func(a, b T) T {
-			return funcs.Cond(cmp(a, b) >= 0, a, b)
-		},
-	)
-}
-
-func Min[T any](s S[T], cmp funcs.Compare[T, T]) gs.Option[T] {
-	return Reduce(
-		s,
-		func(a, b T) T {
-			return funcs.Cond(cmp(a, b) <= 0, a, b)
-		},
-	)
-}
-
-func Sort[T any](s S[T], cmp funcs.Compare[T, T]) S[T] {
-	sort.SliceStable(s, func(i, j int) bool { return cmp(s[i], s[j]) < 0 })
-	return s
 }

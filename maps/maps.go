@@ -151,7 +151,7 @@ func GroupMapReduce[K1, K2 comparable, V1, V2 any](m M[K1, V1], key func(K1, V1)
 		GroupMap(m, key, val),
 		make(M[K2, V2]),
 		func(z M[K2, V2], k K2, v slices.S[V2]) M[K2, V2] {
-			z[k] = slices.Reduce(v, op).Get()
+			z[k] = v.Reduce(op).Get()
 			return z
 		},
 	)
