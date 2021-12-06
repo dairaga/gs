@@ -55,17 +55,36 @@ func (f *F[T]) OnCompleted(op func(gs.Try[T])) {
 	}()
 }
 
+func (f *F[T]) OnSuccess(op func(T)) {
+	go func() {
+		<-f.Done()
+		if f.completed && f.result.IsSuccess() {
+			op(f.result.Get())
+		}
+	}()
+}
+
+func (f *F[T]) OnError(op func(error)) {
+	go func() {
+		<-f.Done()
+		if f.completed && f.result.IsFailure() {
+			op(f.result.Failed())
+		}
+	}()
+}
+
 func (f *F[T]) Foreach(op func(T)) {
 	f.OnCompleted(func(x gs.Try[T]) {
 		x.Foreach(op)
 	})
 }
 
-func (f *F[T]) Wait() {
+func (f *F[T]) Wait() gs.Try[T] {
 	if f.completed {
-		return
+		return f.result
 	}
 	<-f.Done()
+	return f.result
 }
 
 func (f *F[T]) Result(ctx context.Context, atMost time.Duration) gs.Try[T] {
@@ -83,7 +102,7 @@ func (f *F[T]) Result(ctx context.Context, atMost time.Duration) gs.Try[T] {
 	}
 }
 
-func (f *F[T]) Filter(ctx context.Context, p func(T) bool) gs.Future[T] {
+func (f *F[T]) Filter(ctx context.Context, p funcs.Predict[T]) gs.Future[T] {
 	return TransformWith[T](ctx, f, func(x gs.Try[T]) gs.Future[T] {
 		return promise[T](ctx).
 			assign(
@@ -96,7 +115,7 @@ func (f *F[T]) Filter(ctx context.Context, p func(T) bool) gs.Future[T] {
 	})
 }
 
-func (f *F[T]) FilterNot(ctx context.Context, p func(T) bool) gs.Future[T] {
+func (f *F[T]) FilterNot(ctx context.Context, p funcs.Predict[T]) gs.Future[T] {
 	return f.Filter(ctx, func(v T) bool { return !p(v) })
 }
 
@@ -177,11 +196,12 @@ func TransformWith[T, U any](ctx context.Context, f gs.Future[T], op func(gs.Try
 						}
 					case <-ret.Done():
 					}
+					ret.cancel()
 				}()
 			}
 		case <-ret.Done():
+			ret.cancel()
 		}
-		ret.cancel()
 	}()
 
 	return ret
@@ -202,8 +222,14 @@ func Map[T, U any](ctx context.Context, f gs.Future[T], op func(T) U) gs.Future[
 	})
 }
 
-func TryMap[T, U any](ctx context.Context, f gs.Future[T], op func(T) (U, error)) gs.Future[U] {
+func TryMap[T, U any](ctx context.Context, f gs.Future[T], op funcs.Try[T, U]) gs.Future[U] {
 	return Transform(ctx, f, func(x gs.Try[T]) gs.Try[U] {
 		return try.TryMap(x, op)
+	})
+}
+
+func CheckMap[T, U any](ctx context.Context, f gs.Future[T], op funcs.Check[T, U]) gs.Future[U] {
+	return Transform(ctx, f, func(x gs.Try[T]) gs.Try[U] {
+		return try.CheckMap(x, op)
 	})
 }

@@ -1,6 +1,12 @@
 package gs
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/dairaga/gs/funcs"
+)
 
 type Future[T any] interface {
 	fmt.Stringer
@@ -9,7 +15,15 @@ type Future[T any] interface {
 	Completed() bool
 	Get() (Try[T], bool)
 
+	OnSuccess(func(T))
+	OnError(func(error))
 	OnCompleted(func(Try[T]))
+
 	Foreach(func(T))
-	Wait()
+
+	Filter(context.Context, funcs.Predict[T]) Future[T]
+	FilterNot(context.Context, funcs.Predict[T]) Future[T]
+
+	Result(context.Context, time.Duration) Try[T]
+	Wait() Try[T]
 }
