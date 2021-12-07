@@ -19,6 +19,16 @@ var (
 	ErrUnsatisfied = errors.New("unsatisfied")
 )
 
+type Nothing struct{}
+
+func (n Nothing) String() string {
+	return "Nothing"
+}
+
+var nothing = struct{}{}
+
+func N() Nothing { return nothing }
+
 type Numeric interface {
 	constraints.Integer | constraints.Float
 }
