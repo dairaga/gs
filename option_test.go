@@ -14,7 +14,7 @@ func assertOption[T any](t *testing.T, a, b gs.Option[T]) {
 	aval, aerr := a.Fetch()
 	bval, berr := b.Fetch()
 	assert.Equal(t, aval, bval)
-	assert.Equal(t, aerr, berr)
+	assert.True(t, errors.Is(aerr, berr))
 }
 
 func TestSome(t *testing.T) {
@@ -133,8 +133,8 @@ func TestOptionFilterNot(t *testing.T) {
 	assertOption(t, gs.Some(100).FilterNot(p1), gs.None[int]())
 	assertOption(t, gs.Some(100).FilterNot(p2), gs.Some(100))
 
-	assertOption(t, gs.None[int]().Filter(p1), gs.None[int]())
-	assertOption(t, gs.None[int]().Filter(p2), gs.None[int]())
+	assertOption(t, gs.None[int]().FilterNot(p1), gs.None[int]())
+	assertOption(t, gs.None[int]().FilterNot(p2), gs.None[int]())
 }
 
 func TestOptionGetOrElse(t *testing.T) {
