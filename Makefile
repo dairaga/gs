@@ -1,7 +1,7 @@
 .PHONY: clean test
 
-GOROOT=/Users/kigi/goroot
-GOPATH=/Users/kigi/go2
+GOROOT=${HOME}/goroot
+GOPATH=${HOME}/go2
 PKG=github.com/dairaga/gs
 
 test:
