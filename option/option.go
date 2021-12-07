@@ -27,6 +27,7 @@ func Unless[T any](p funcs.Condition, z T) gs.Option[T] {
 }
 
 func Fold[T, R any](o gs.Option[T], z R, op funcs.Func[T, R]) R {
+	// FIXME: reference scala
 	return funcs.BuildOrElse(o.Fetch, z, op)
 }
 

@@ -46,6 +46,10 @@ func (t *try[T]) String() string {
 	return fmt.Sprintf(`Failure(%s)`, t.left.Error())
 }
 
+func (t *try[T]) Fetch() (T, error) {
+	return t.right, t.left
+}
+
 func (t *try[T]) IsSuccess() bool {
 	return t.ok
 }
