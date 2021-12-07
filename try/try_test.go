@@ -2,9 +2,11 @@ package try_test
 
 import (
 	"errors"
+	"strconv"
 	"testing"
 
 	"github.com/dairaga/gs"
+	"github.com/dairaga/gs/funcs"
 	"github.com/dairaga/gs/try"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,17 +33,115 @@ func TestFromWithBool(t *testing.T) {
 }
 
 func TestFold(t *testing.T) {
+	fail := func(err error) string {
+		return err.Error()
+	}
+	assert.Equal(t, "1", try.Fold(gs.Success(1), fail, strconv.Itoa))
+	assert.Equal(t,
+		gs.ErrEmpty.Error(),
+		try.Fold(gs.Failure[int](gs.ErrEmpty), fail, strconv.Itoa))
+}
+
+func TestCollect(t *testing.T) {
+	convErr := errors.New("conv error")
+
+	p := func(v string) (int, error) {
+		if len(v) <= 2 {
+			a, err := strconv.Atoi(v)
+			if err == nil {
+				return a, nil
+			}
+			return a, convErr
+		}
+		return 0, gs.ErrUnsatisfied
+	}
+
+	assertTry(t, gs.Success(1), try.Collect(gs.Success("1"), p))
+	assertTry(
+		t,
+		gs.Failure[int](gs.ErrUnsatisfied),
+		try.Collect(gs.Success("100"), p),
+	)
+
+	assertTry(
+		t,
+		gs.Failure[int](convErr),
+		try.Collect(gs.Success("ab"), p),
+	)
 
 }
 
-func TestCollect(t *testing.T) {}
+func TestFlatMap(t *testing.T) {
+	op := func(v int) gs.Try[string] {
+		return gs.Success(strconv.Itoa(v))
+	}
 
-func TestFlatMap(t *testing.T) {}
+	assertTry(t, gs.Success("1"), try.FlatMap(gs.Success(1), op))
+	assertTry(t,
+		gs.Failure[string](gs.ErrEmpty),
+		try.FlatMap(gs.Failure[int](gs.ErrEmpty), op))
+}
 
-func TestMap(t *testing.T) {}
+func TestMap(t *testing.T) {
+	assertTry(
+		t,
+		gs.Success("1"),
+		try.Map(gs.Success(1), strconv.Itoa),
+	)
 
-func TestTryMap(t *testing.T) {}
+	assertTry(
+		t,
+		gs.Failure[string](gs.ErrEmpty),
+		try.Map(gs.Failure[int](gs.ErrEmpty), strconv.Itoa),
+	)
+}
 
-func TestCanMap(t *testing.T) {}
+func TestTryMap(t *testing.T) {
+	assertTry(t, gs.Success(1), try.TryMap(gs.Success("1"), strconv.Atoi))
+	assertTry(t,
+		gs.Failure[int](gs.ErrEmpty),
+		try.TryMap(gs.Failure[string](gs.ErrEmpty), strconv.Atoi),
+	)
+}
 
-func TestTransform(t *testing.T) {}
+func TestCanMap(t *testing.T) {
+	op := func(s string) (int, bool) {
+		a, err := strconv.Atoi(s)
+		return a, err == nil
+	}
+
+	assertTry(t, gs.Success(1), try.CanMap(gs.Success("1"), op))
+	assertTry(t,
+		gs.Failure[int](gs.ErrEmpty),
+		try.CanMap(gs.Failure[string](gs.ErrEmpty), op),
+	)
+}
+
+func TestTransform(t *testing.T) {
+	errConv := errors.New("conv error")
+	succ := funcs.TryRecover(
+		func(s string) (int, error) {
+			a, err := strconv.Atoi(s)
+			if err != nil {
+				return a, errConv
+			}
+			return a, nil
+		},
+		try.From[int])
+
+	fail := gs.Failure[int]
+
+	assertTry(t,
+		gs.Success(1),
+		try.Transform(gs.Success("1"), fail, succ))
+
+	assertTry(t,
+		gs.Failure[int](errConv),
+		try.Transform(gs.Success("abc"), fail, succ))
+
+	assertTry(t,
+		gs.Failure[int](gs.ErrEmpty),
+		try.Transform(gs.Failure[string](gs.ErrEmpty), fail, succ),
+	)
+
+}
