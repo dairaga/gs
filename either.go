@@ -48,7 +48,7 @@ func (e *either[L, R]) String() string {
 }
 
 func (e *either[L, R]) Fetch() (R, error) {
-	return e.right, funcs.Cond(e.ok, nil, ErrLeft)
+	return e.right, funcs.Cond(e.ok, nil, err(e.left))
 }
 
 func (e *either[L, R]) Get() R {
@@ -114,14 +114,15 @@ func (e *either[L, R]) Try() Try[R] {
 	if e.ok {
 		return success(e.right)
 	}
+	return failure[R](err(e.left))
+}
 
-	var x interface{} = e.left
-
+func err(x interface{}) error {
 	switch v := x.(type) {
 	case error:
-		return failure[R](v)
+		return v
 	default:
-		return failure[R](ErrLeft)
+		return ErrLeft
 	}
 }
 
