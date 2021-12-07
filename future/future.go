@@ -228,8 +228,8 @@ func TryMap[T, U any](ctx context.Context, f gs.Future[T], op funcs.Try[T, U]) g
 	})
 }
 
-func CheckMap[T, U any](ctx context.Context, f gs.Future[T], op funcs.Check[T, U]) gs.Future[U] {
+func CanMap[T, U any](ctx context.Context, f gs.Future[T], op funcs.Can[T, U]) gs.Future[U] {
 	return Transform(ctx, f, func(x gs.Try[T]) gs.Try[U] {
-		return try.CheckMap(x, op)
+		return try.CanMap(x, op)
 	})
 }

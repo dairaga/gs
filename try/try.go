@@ -20,7 +20,7 @@ func Fold[T, R any](t gs.Try[T], succ funcs.Func[T, R], fail funcs.Func[error, R
 }
 
 func Collect[T, R any](t gs.Try[T], p funcs.Try[T, R]) gs.Try[R] {
-	return Fold(t, funcs.TryAndRecover(p, From[R]), gs.Failure[R])
+	return Fold(t, funcs.TryRecover(p, From[R]), gs.Failure[R])
 }
 
 func FlatMap[T, R any](t gs.Try[T], op funcs.Func[T, gs.Try[R]]) gs.Try[R] {
@@ -32,11 +32,11 @@ func Map[T, R any](t gs.Try[T], op funcs.Func[T, R]) gs.Try[R] {
 }
 
 func TryMap[T, R any](t gs.Try[T], op funcs.Try[T, R]) gs.Try[R] {
-	return Fold(t, funcs.TryAndRecover(op, From[R]), gs.Failure[R])
+	return Fold(t, funcs.TryRecover(op, From[R]), gs.Failure[R])
 }
 
-func CheckMap[T, R any](t gs.Try[T], op funcs.Check[T, R]) gs.Try[R] {
-	return Fold(t, funcs.CheckAndTransform(op, FromWithBool[R]), gs.Failure[R])
+func CanMap[T, R any](t gs.Try[T], op funcs.Can[T, R]) gs.Try[R] {
+	return Fold(t, funcs.CanTransform(op, FromWithBool[R]), gs.Failure[R])
 }
 
 func Transform[T, R any](t gs.Try[T], succ funcs.Func[T, gs.Try[R]], fail funcs.Func[error, gs.Try[R]]) gs.Try[R] {

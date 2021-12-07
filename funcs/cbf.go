@@ -2,8 +2,6 @@ package funcs
 
 type Fetcher[T any] func() (T, error)
 
-// TODO: refactor the method when go 1.19 releases.
-
 func (f Fetcher[T]) Exists(p Predict[T]) bool {
 	v, err := f()
 	return err == nil && p(v)
@@ -31,6 +29,10 @@ func BuildFrom[T, R any](v T, err error, succ Func[T, R], fail Func[error, R]) R
 	}
 	return fail(err)
 }
+
+// -----------------------------------------------------------------------------
+
+// TODO: refactor the method when go 1.19 releases.
 
 func Build[T, R any](f Fetcher[T], succ Func[T, R], fail Func[error, R]) R {
 	v, err := f()

@@ -228,7 +228,7 @@ func TestFlatAndMap(t *testing.T) {
 		context.Background(),
 		f,
 		func(a int) gs.Future[int] {
-			return future.CheckMap(context.Background(), g, func(b int) (int, bool) {
+			return future.CanMap(context.Background(), g, func(b int) (int, bool) {
 				return 0, false
 			})
 		},

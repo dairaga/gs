@@ -123,7 +123,7 @@ func Equal[T comparable](s1 S[T], s2 S[T]) bool {
 	return EqualFunc(s1, s2, func(a, b T) bool { return a == b })
 }
 
-func Collect[T, U any](s S[T], p funcs.Check[T, U]) S[U] {
+func Collect[T, U any](s S[T], p funcs.Can[T, U]) S[U] {
 	return Fold(
 		s,
 		Empty[U](),
@@ -136,7 +136,7 @@ func Collect[T, U any](s S[T], p funcs.Check[T, U]) S[U] {
 	)
 }
 
-func CollectFirst[T, U any](s S[T], p funcs.Check[T, U]) gs.Option[U] {
+func CollectFirst[T, U any](s S[T], p funcs.Can[T, U]) gs.Option[U] {
 	for i := range s {
 		if u, ok := p(s[i]); ok {
 			return gs.Some(u)

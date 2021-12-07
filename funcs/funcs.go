@@ -6,7 +6,7 @@ type Predict[T any] func(T) bool
 type Unit[R any] func() R
 type Condition func() bool
 
-type Check[T, R any] func(T) (R, bool)
+type Can[T, R any] func(T) (R, bool)
 type Try[T, R any] func(T) (R, error)
 
 type Transform[T, R any] func(T, bool) R
@@ -48,13 +48,13 @@ func ComposeUnit[T, R any](f Func[T, R], g Unit[T]) Unit[R] {
 	}
 }
 
-func CheckAndTransform[T, U, R any](f1 Check[T, U], f2 Transform[U, R]) Func[T, R] {
+func CanTransform[T, U, R any](f1 Can[T, U], f2 Transform[U, R]) Func[T, R] {
 	return func(v T) R {
 		return f2(f1(v))
 	}
 }
 
-func TryAndRecover[T, U, R any](f1 Try[T, U], f2 Recover[U, R]) Func[T, R] {
+func TryRecover[T, U, R any](f1 Try[T, U], f2 Recover[U, R]) Func[T, R] {
 	return func(v T) R {
 		return f2(f1(v))
 	}

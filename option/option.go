@@ -30,8 +30,8 @@ func Fold[T, R any](o gs.Option[T], succ funcs.Func[T, R], fail funcs.Unit[R]) R
 	return funcs.BuildUnit(o.Fetch, succ, fail)
 }
 
-func Collect[T, R any](o gs.Option[T], p funcs.Check[T, R]) gs.Option[R] {
-	return Fold(o, funcs.CheckAndTransform(p, From[R]), gs.None[R])
+func Collect[T, R any](o gs.Option[T], p funcs.Can[T, R]) gs.Option[R] {
+	return Fold(o, funcs.CanTransform(p, From[R]), gs.None[R])
 }
 
 func FlatMap[T, R any](o gs.Option[T], op funcs.Func[T, gs.Option[R]]) gs.Option[R] {
@@ -42,12 +42,12 @@ func Map[T, R any](o gs.Option[T], op funcs.Func[T, R]) gs.Option[R] {
 	return Fold(o, funcs.AndThen(op, gs.Some[R]), gs.None[R])
 }
 
-func CheckMap[T, R any](o gs.Option[T], op funcs.Check[T, R]) gs.Option[R] {
-	return Fold(o, funcs.CheckAndTransform(op, From[R]), gs.None[R])
+func CheckMap[T, R any](o gs.Option[T], op funcs.Can[T, R]) gs.Option[R] {
+	return Fold(o, funcs.CanTransform(op, From[R]), gs.None[R])
 }
 
 func TryMap[T, R any](o gs.Option[T], op funcs.Try[T, R]) gs.Option[R] {
-	return Fold(o, funcs.TryAndRecover(op, FromWithErr[R]), gs.None[R])
+	return Fold(o, funcs.TryRecover(op, FromWithErr[R]), gs.None[R])
 }
 
 func Left[T, R any](o gs.Option[T], z R) gs.Either[T, R] {
