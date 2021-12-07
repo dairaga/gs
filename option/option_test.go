@@ -17,7 +17,7 @@ func assertOption[T any](t *testing.T, a, b gs.Option[T]) {
 	aval, aerr := a.Fetch()
 	bval, berr := b.Fetch()
 	assert.Equal(t, aval, bval)
-	assert.Equal(t, aerr, berr)
+	assert.True(t, errors.Is(aerr, berr))
 }
 
 var trueF = func() bool { return true }
