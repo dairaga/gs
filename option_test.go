@@ -20,6 +20,7 @@ func assertOption[T any](t *testing.T, a, b gs.Option[T]) {
 func TestSome(t *testing.T) {
 	v := 0
 	opt := gs.Some(v)
+	t.Log(opt)
 	assert.True(t, opt.IsDefined())
 	assert.Equal(t, v, opt.Get())
 
@@ -43,6 +44,7 @@ func TestSome(t *testing.T) {
 
 func TestNone(t *testing.T) {
 	opt := gs.None[int]()
+	t.Log(opt)
 	assert.True(t, opt.IsEmpty())
 	assert.Panics(t, func() { opt.Get() })
 

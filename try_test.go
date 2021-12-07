@@ -21,7 +21,7 @@ func assertTry[T any](t *testing.T, a, b gs.Try[T]) {
 
 func TestSuccess(t *testing.T) {
 	try := gs.Success(0)
-
+	t.Log(try)
 	assert.True(t, try.IsSuccess())
 	assert.Equal(t, 0, try.Get())
 	assert.Equal(t, 0, try.Success())
@@ -42,7 +42,7 @@ func TestSuccess(t *testing.T) {
 
 func TestFailure(t *testing.T) {
 	try := gs.Failure[int](gs.ErrUnsatisfied)
-
+	t.Log(try)
 	assert.True(t, try.IsFailure())
 	assert.True(t, errors.Is(gs.ErrUnsatisfied, try.Failed()))
 	assert.Panics(t, func() { try.Get() })
