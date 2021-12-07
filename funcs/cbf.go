@@ -39,6 +39,14 @@ func Build[T, R any](f Fetcher[T], succ Func[T, R], fail Func[error, R]) R {
 	return BuildFrom(v, err, succ, fail)
 }
 
+func BuildOrElse[T, R any](f Fetcher[T], z R, build Func[T, R]) R {
+	v, err := f()
+	if err == nil {
+		return build(v)
+	}
+	return z
+}
+
 func BuildUnit[T, R any](f Fetcher[T], succ Func[T, R], fail Unit[R]) R {
 	if v, err := f(); err == nil {
 		return succ(v)
