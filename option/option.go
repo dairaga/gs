@@ -26,35 +26,34 @@ func Unless[T any](p funcs.Condition, z T) gs.Option[T] {
 	return From(z, !p())
 }
 
-func Fold[T, R any](o gs.Option[T], z R, op funcs.Func[T, R]) R {
-	// FIXME: reference scala
-	return funcs.BuildOrElse(o.Fetch, z, op)
+func Fold[T, R any](o gs.Option[T], z R, succ funcs.Func[T, R]) R {
+	return funcs.BuildUnit(o.Fetch, funcs.Id(z), succ)
 }
 
 func Collect[T, R any](o gs.Option[T], p funcs.Can[T, R]) gs.Option[R] {
-	return funcs.BuildUnit(o.Fetch, funcs.CanTransform(p, From[R]), gs.None[R])
+	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.CanTransform(p, From[R]))
 }
 
 func FlatMap[T, R any](o gs.Option[T], op funcs.Func[T, gs.Option[R]]) gs.Option[R] {
-	return funcs.BuildUnit(o.Fetch, op, gs.None[R])
+	return funcs.BuildUnit(o.Fetch, gs.None[R], op)
 }
 
 func Map[T, R any](o gs.Option[T], op funcs.Func[T, R]) gs.Option[R] {
-	return funcs.BuildUnit(o.Fetch, funcs.AndThen(op, gs.Some[R]), gs.None[R])
+	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.AndThen(op, gs.Some[R]))
 }
 
 func CanMap[T, R any](o gs.Option[T], op funcs.Can[T, R]) gs.Option[R] {
-	return funcs.BuildUnit(o.Fetch, funcs.CanTransform(op, From[R]), gs.None[R])
+	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.CanTransform(op, From[R]))
 }
 
 func TryMap[T, R any](o gs.Option[T], op funcs.Try[T, R]) gs.Option[R] {
-	return funcs.BuildUnit(o.Fetch, funcs.TryRecover(op, FromWithErr[R]), gs.None[R])
+	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.TryRecover(op, FromWithErr[R]))
 }
 
 func Left[T, R any](o gs.Option[T], z R) gs.Either[T, R] {
-	return funcs.BuildUnit(o.Fetch, gs.Left[T, R], funcs.UnitAndThen(funcs.Id(z), gs.Right[T, R]))
+	return funcs.BuildUnit(o.Fetch, funcs.UnitAndThen(funcs.Id(z), gs.Right[T, R]), gs.Left[T, R])
 }
 
 func Right[L, T any](o gs.Option[T], z L) gs.Either[L, T] {
-	return funcs.BuildUnit(o.Fetch, gs.Right[L, T], funcs.UnitAndThen(funcs.Id(z), gs.Left[L, T]))
+	return funcs.BuildUnit(o.Fetch, funcs.UnitAndThen(funcs.Id(z), gs.Left[L, T]), gs.Right[L, T])
 }
