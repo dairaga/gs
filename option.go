@@ -42,6 +42,10 @@ func (o *option[T]) String() string {
 	return fmt.Sprintf(`None(%s)`, reflect.TypeOf(o.right).String())
 }
 
+func (o *option[T]) Fetch() (T, error) {
+	return o.right, o.left
+}
+
 func (o *option[T]) Check() (T, bool) {
 	return o.right, o.ok
 }
