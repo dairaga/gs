@@ -46,7 +46,7 @@ func (s S[T]) IndexWhereFrom(p funcs.Predict[T], from int) int {
 	if from < 0 {
 		from = size + from
 	}
-	
+
 	from = funcs.Min(from, size-1)
 	from = funcs.Max(0, from)
 

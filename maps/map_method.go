@@ -26,6 +26,25 @@ func (m M[K, V]) Values() slices.S[V] {
 	)
 }
 
+func (m M[K, V]) Add(pairs ...Pair[K, V]) M[K, V] {
+	for _, p := range pairs {
+		m[p.Key] = p.Value
+	}
+	return m
+}
+
+func (m M[K, V]) Put(key K, val V) M[K, V] {
+	m[key] = val
+	return m
+}
+
+func (m M[K, V]) Merge(a M[K, V]) M[K, V] {
+	for k, v := range a {
+		m[k] = v
+	}
+	return m
+}
+
 func (m M[K, V]) Contain(x K) (ok bool) {
 	_, ok = m[x]
 	return
@@ -55,17 +74,20 @@ func (m M[K, V]) Exists(p func(K, V) bool) bool {
 	return false
 }
 
-func (m M[K, V]) Filter(p func(K, V) bool) slices.S[Pair[K, V]] {
+func (m M[K, V]) Filter(p func(K, V) bool) M[K, V] {
 	return Fold(
 		m,
-		slices.Empty[Pair[K, V]](),
-		func(z slices.S[Pair[K, V]], k K, v V) slices.S[Pair[K, V]] {
-			return funcs.Cond(p(k, v), append(z, P(k, v)), z)
+		make(M[K, V]),
+		func(z M[K, V], k K, v V) M[K, V] {
+			if p(k, v) {
+				z[k] = v
+			}
+			return z
 		},
 	)
 }
 
-func (m M[K, V]) FilterNot(p func(K, V) bool) slices.S[Pair[K, V]] {
+func (m M[K, V]) FilterNot(p func(K, V) bool) M[K, V] {
 	return m.Filter(func(k K, v V) bool { return !p(k, v) })
 }
 
@@ -84,15 +106,15 @@ func (m M[K, V]) Foreach(op func(K, V)) {
 	}
 }
 
-func (m M[K, V]) Partition(p func(K, V) bool) (_, _ slices.S[Pair[K, V]]) {
+func (m M[K, V]) Partition(p func(K, V) bool) (_, _ M[K, V]) {
 	t2 := Fold(
 		m,
-		gs.T2(slices.Empty[Pair[K, V]](), slices.Empty[Pair[K, V]]()),
-		func(z gs.Tuple2[slices.S[Pair[K, V]], slices.S[Pair[K, V]]], k K, v V) gs.Tuple2[slices.S[Pair[K, V]], slices.S[Pair[K, V]]] {
+		gs.T2(make(M[K, V]), make(M[K, V])),
+		func(z gs.Tuple2[M[K, V], M[K, V]], k K, v V) gs.Tuple2[M[K, V], M[K, V]] {
 			if p(k, v) {
-				z.V2 = append(z.V2, P(k, v))
+				z.V2[k] = v
 			} else {
-				z.V1 = append(z.V1, P(k, v))
+				z.V1[k] = v
 			}
 			return z
 		},
