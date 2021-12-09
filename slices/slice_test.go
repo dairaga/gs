@@ -85,11 +85,11 @@ func TestSliceLastIndexWhereFrom(t *testing.T) {
 
 func TestSliceForall(t *testing.T) {
 	s := slices.From(1, 3, 5, 7, 9, 2, 4, 6, 8)
-	p1 := func(v int) bool {
+	p1 := func(_ int, v int) bool {
 		return v >= 0
 	}
 
-	p2 := func(v int) bool {
+	p2 := func(_ int, v int) bool {
 		return v > 5
 	}
 	assert.True(t, slices.Empty[int]().Forall(p1))
@@ -101,10 +101,10 @@ func TestSliceForall(t *testing.T) {
 
 func TestSliceExists(t *testing.T) {
 	s := slices.From(1, 3, 5, 7, 9, 2, 4, 6, 8)
-	p1 := func(v int) bool {
+	p1 := func(_ int, v int) bool {
 		return v > 0
 	}
-	p2 := func(v int) bool {
+	p2 := func(_ int, v int) bool {
 		return v < 0
 	}
 
@@ -120,7 +120,7 @@ func TestSliceForeach(t *testing.T) {
 	s := slices.From(1, 3, 5, 7, 9, 2, 4, 6, 8)
 
 	sum := 0
-	s.Foreach(func(v int) {
+	s.Foreach(func(_int, v int) {
 		sum += v
 	})
 	assert.Equal(t, 45, sum)

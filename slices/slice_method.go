@@ -92,27 +92,27 @@ func (s S[T]) LastIndexWhere(p funcs.Predict[T]) int {
 	return s.LastIndexWhereFrom(p, -1)
 }
 
-func (s S[T]) Forall(p funcs.Predict[T]) bool {
+func (s S[T]) Forall(p func(int, T) bool) bool {
 	for i := range s {
-		if !p(s[i]) {
+		if !p(i, s[i]) {
 			return false
 		}
 	}
 	return true
 }
 
-func (s S[T]) Exists(p funcs.Predict[T]) bool {
+func (s S[T]) Exists(p func(int, T) bool) bool {
 	for i := range s {
-		if p(s[i]) {
+		if p(i, s[i]) {
 			return true
 		}
 	}
 	return false
 }
 
-func (s S[T]) Foreach(op func(T)) {
+func (s S[T]) Foreach(op func(int, T)) {
 	for i := range s {
-		op(s[i])
+		op(i, s[i])
 	}
 }
 
