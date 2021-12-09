@@ -46,6 +46,9 @@ func (s S[T]) IndexWhereFrom(p funcs.Predict[T], from int) int {
 	if from < 0 {
 		from = size + from
 	}
+	
+	from = funcs.Min(from, size-1)
+	from = funcs.Max(0, from)
 
 	for i := from; i < size; i++ {
 		if p(s[i]) {
@@ -70,6 +73,7 @@ func (s S[T]) LastIndexWhereFrom(p funcs.Predict[T], from int) int {
 	}
 
 	from = funcs.Min(from, size-1)
+	from = funcs.Max(0, from)
 
 	for i := from; i >= 0; i-- {
 		if p(s[i]) {
@@ -148,12 +152,28 @@ func (s S[T]) FilterNot(p funcs.Predict[T]) S[T] {
 	return s.Filter(func(v T) bool { return !p(v) })
 }
 
-func (s S[T]) Find(p funcs.Predict[T]) gs.Option[T] {
-	pos := s.IndexWhere(p)
+func (s S[T]) FindFrom(p funcs.Predict[T], from int) gs.Option[T] {
+	pos := s.IndexWhereFrom(p, from)
 	if pos >= 0 {
 		return gs.Some(s[pos])
 	}
 	return gs.None[T]()
+}
+
+func (s S[T]) Find(p funcs.Predict[T]) gs.Option[T] {
+	return s.FindFrom(p, 0)
+}
+
+func (s S[T]) FindLastFrom(p funcs.Predict[T], from int) gs.Option[T] {
+	pos := s.LastIndexWhereFrom(p, from)
+	if pos >= 0 {
+		return gs.Some(s[pos])
+	}
+	return gs.None[T]()
+}
+
+func (s S[T]) FindLast(p funcs.Predict[T]) gs.Option[T] {
+	return s.FindLastFrom(p, -1)
 }
 
 func (s S[T]) Partition(p funcs.Predict[T]) (_, _ S[T]) {
@@ -183,7 +203,8 @@ func (s S[T]) SplitAt(n int) (a, b S[T]) {
 		n = size + n
 	}
 
-	n = funcs.Max(n, size)
+	n = funcs.Min(n, size)
+	n = funcs.Max(0, n)
 
 	return s[0:n], s[n:]
 }

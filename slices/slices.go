@@ -55,15 +55,15 @@ func Tabulate[T any](size int, op funcs.Func[int, T]) S[T] {
 
 // TODO: refactor the method when go 1.19 releases.
 
-func IndexFromFunc[T, U any](s S[T], x U, from int, eq funcs.Equal[U, T]) int {
+func IndexFromFunc[T, U any](s S[T], x U, from int, eq funcs.Equal[T, U]) int {
 	p := func(v T) bool {
-		return eq(x, v)
+		return eq(v, x)
 	}
 
 	return s.IndexWhereFrom(p, from)
 }
 
-func IndexFunc[T, U any](s S[T], x U, eq funcs.Equal[U, T]) int {
+func IndexFunc[T, U any](s S[T], x U, eq funcs.Equal[T, U]) int {
 	return IndexFromFunc(s, x, 0, eq)
 }
 
@@ -75,15 +75,15 @@ func Index[T comparable](s S[T], x T) int {
 	return IndexFrom(s, x, 0)
 }
 
-func LastIndexFromFunc[T, U any](s S[T], x U, from int, eq funcs.Equal[U, T]) int {
+func LastIndexFromFunc[T, U any](s S[T], x U, from int, eq funcs.Equal[T, U]) int {
 	p := func(v T) bool {
-		return eq(x, v)
+		return eq(v, x)
 	}
 
 	return s.LastIndexWhereFrom(p, from)
 }
 
-func LastIndexFunc[T, U any](s S[T], x U, eq funcs.Equal[U, T]) int {
+func LastIndexFunc[T, U any](s S[T], x U, eq funcs.Equal[T, U]) int {
 	return LastIndexFromFunc(s, x, -1, eq)
 }
 
@@ -99,7 +99,7 @@ func Contain[T comparable](s S[T], x T) bool {
 	return Index(s, x) >= 0
 }
 
-func ContainFunc[T, U any](s S[T], x U, eq funcs.Equal[U, T]) bool {
+func ContainFunc[T, U any](s S[T], x U, eq funcs.Equal[T, U]) bool {
 	return IndexFunc(s, x, eq) >= 0
 }
 
@@ -147,7 +147,6 @@ func CollectFirst[T, U any](s S[T], p funcs.Can[T, U]) gs.Option[U] {
 
 func FoldLeft[T, U any](s S[T], z U, op func(U, T) U) (ret U) {
 	ret = z
-
 	for i := range s {
 		ret = op(ret, s[i])
 	}
@@ -156,6 +155,7 @@ func FoldLeft[T, U any](s S[T], z U, op func(U, T) U) (ret U) {
 }
 
 func FoldRight[T, U any](s S[T], z U, op func(T, U) U) (ret U) {
+	ret = z
 	size := len(s)
 	for i := size - 1; i >= 0; i-- {
 		ret = op(s[i], ret)
@@ -252,6 +252,12 @@ func MaxBy[T any, R constraints.Ordered](s S[T], op funcs.Order[T, R]) gs.Option
 
 func MinBy[T any, R constraints.Ordered](s S[T], op funcs.Order[T, R]) gs.Option[T] {
 	return s.Min(func(a, b T) int { return funcs.Cmp(op(a), op(b)) })
+}
+
+func SortBy[T any, R constraints.Ordered](s S[T], op funcs.Order[T, R]) S[T] {
+	return s.Sort(func(a, b T) int {
+		return funcs.Cmp(op(a), op(b))
+	})
 }
 
 func IsEmpty[T any](s S[T]) bool {
