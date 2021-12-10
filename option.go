@@ -12,25 +12,56 @@ import (
 	"github.com/dairaga/gs/funcs"
 )
 
+// Option is simplified Scala Option. Option like Either is either Some or None.
+// Some means this has value; None means Nothing or Nil.
+// Suggest to return Option from function or method instead of nil.
 type Option[T any] interface {
 	fmt.Stringer
-	Fetch() (T, error)
-	Check() (T, bool)
+
+	// Fetch returns value v from Some and err is nil if this is a Some,
+	// otherwise v is a zero value and err is ErrEmpty.
+	Fetch() (v T, err error)
+
+	// Check returns value v from Some and ok is true if this is a Some,
+	// otherwise v is a zero value and ok is false.
+	Check() (v T, ok bool)
+
+	// Get returns value from Some, or panic.
 	Get() T
 
+	// IsDefined returns true if this is a Some.
 	IsDefined() bool
+
+	// IsEmpty returns true if this is a None.
 	IsEmpty() bool
 
-	Exists(funcs.Predict[T]) bool
-	Forall(funcs.Predict[T]) bool
-	Foreach(func(T))
+	// Exists returns true if this is a Some and value satisifies given function p.
+	Exists(p funcs.Predict[T]) bool
 
-	Filter(funcs.Predict[T]) Option[T]
+	// Forall returns true if this is a None or value from Succes satisfies given function p.
+	Forall(p funcs.Predict[T]) bool
+
+	// Foreach only applies given function op to value from Success.
+	Foreach(op func(T))
+
+	// Filter returns this if this is a None or value from Some satisfies given function p,
+	// otherwise returns None.
+	Filter(p funcs.Predict[T]) Option[T]
+
+	// FilterNot returns this if this is a None or value from Some satisfies given function p,
+	// otherwise returns None.
 	FilterNot(funcs.Predict[T]) Option[T]
-	GetOrElse(T) T
+
+	// GetOrElse returns value from Some, or returns given z.
+	GetOrElse(z T) T
+
+	// OrElse returns this if this is a Some, or returns given z.
 	OrElse(Option[T]) Option[T]
 
+	// Try returns Success with value of Some, or Failure with ErrEmpty.
 	Try() Try[T]
+
+	// Either returns Rigt with value from Some, or Left with ErrEmpty.
 	Either() Either[error, T]
 }
 

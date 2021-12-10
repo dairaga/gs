@@ -11,6 +11,7 @@ import (
 )
 
 var (
+
 	// ErrEmpty represents object is empty or undefined.
 	ErrEmpty = errors.New("empty")
 
@@ -24,6 +25,7 @@ var (
 	ErrUnsatisfied = errors.New("unsatisfied")
 )
 
+// Nothing represents Nothing in scala.
 type Nothing struct{}
 
 func (n Nothing) String() string {
@@ -32,18 +34,22 @@ func (n Nothing) String() string {
 
 var nothing = struct{}{}
 
+// N returns Nothing.
 func N() Nothing { return nothing }
 
+// Numeric includes Integer and Float.
 type Numeric interface {
 	constraints.Integer | constraints.Float
 }
 
+// Tuple2 is tuple with size 2.
 type Tuple2[V1, V2 any] struct {
 	_  struct{}
 	V1 V1
 	V2 V2
 }
 
+// T2 returns Tuple2.
 func T2[V1, V2 any](v1 V1, v2 V2) Tuple2[V1, V2] {
 	return Tuple2[V1, V2]{
 		V1: v1,

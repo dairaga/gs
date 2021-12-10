@@ -11,28 +11,63 @@ import (
 	"github.com/dairaga/gs/funcs"
 )
 
+// Either is simplified Scala Either. Concept of Ether is either A or B.
+// Either has two subclass Right and Left in Scala.
+// Conventionally, Right means Positive and True; Left means Negative and False.
 type Either[L, R any] interface {
 	fmt.Stringer
-	Fetch() (R, error)
+
+	// Fetch returns right value if this is a Right.
+	// err is original value if this is a Left with error type, or ErrLeft.
+	Fetch() (r R, err error)
+
+	// Get returns Right value if this is a Right, or panic.
 	Get() R
 
+	// IsRight returns true if this is a Right.
 	IsRight() bool
+
+	// Right returns Right value if this is a Right, or panic.
 	Right() R
 
+	// IsLeft returns true if this is a Left.
 	IsLeft() bool
+
+	// Left returns Left value if this is a Left, or panic.
 	Left() L
 
-	Exists(funcs.Predict[R]) bool
-	Forall(funcs.Predict[R]) bool
-	Foreach(func(R))
+	// Exists returns true if this is a Right,
+	// and value satisfies given function p.
+	Exists(p funcs.Predict[R]) bool
 
-	FilterOrElse(funcs.Predict[R], L) Either[L, R]
-	GetOrElse(R) R
-	OrElse(Either[L, R]) Either[L, R]
+	// Forall returns true if this is a Left,
+	// or value from Right satisfies given function p.
+	Forall(p funcs.Predict[R]) bool
 
+	// Foreach only applies given function op to value from Right.
+	Foreach(op func(R))
+
+	// FilterNoElse returns this if this is a Right and satisfies given function p,
+	// or returns Left with z.
+	FilterOrElse(p funcs.Predict[R], z L) Either[L, R]
+
+	// GetOrElse returns value from Right, or returns z.
+	GetOrElse(z R) R
+
+	// OrElse returns this if this is a Right, or returns z.
+	OrElse(z Either[L, R]) Either[L, R]
+
+	// Swap returns new Either swapping Right and Left side.
 	Swap() Either[R, L]
 
+	// Try converts to Try. Right converts to Success,
+	// and Left converts to Failure.
+	// Left value is reserved if Left type is error,
+	// or returns Failure with ErrLeft.
 	Try() Try[R]
+
+	// Option converts to Option. Right converts to Some,
+	// and Left converts to None.
 	Option() Option[R]
 }
 
