@@ -37,7 +37,7 @@ func From[K comparable, V any](a ...Pair[K, V]) (ret M[K, V]) {
 
 // -----------------------------------------------------------------------------
 
-// TODO: refactor the method when go 1.19 releases.
+// TODO: refactor following functions to methods when go 1.19 releases.
 
 func Fold[K comparable, V, U any](m M[K, V], z U, op func(U, K, V) U) (ret U) {
 	ret = z

@@ -124,8 +124,6 @@ func (f *F[T]) FilterNot(ctx context.Context, p funcs.Predict[T]) gs.Future[T] {
 	return f.Filter(ctx, func(v T) bool { return !p(v) })
 }
 
-// -----------------------------------------------------------------------------
-
 func promise[T any](parent context.Context) *F[T] {
 	ret := &F[T]{}
 	ret.ctx, ret.cancel = context.WithCancel(parent)
@@ -162,6 +160,10 @@ func Try[T any](parent context.Context, op func() (T, error)) gs.Future[T] {
 	}(ret)
 	return ret
 }
+
+// -----------------------------------------------------------------------------
+
+// TODO: refactor following functions to methods when go 1.19 releases.
 
 func Transform[T, U any](ctx context.Context, f gs.Future[T], op func(gs.Try[T]) gs.Try[U]) gs.Future[U] {
 	ret := promise[U](ctx)

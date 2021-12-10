@@ -10,16 +10,24 @@ import (
 	"github.com/dairaga/gs/funcs"
 )
 
-// TODO: refactor the method when go 1.19 releases.
-
+// From is a Try builder returns Success with given v if err is nil,
+// otherwise returns Failure with error.
 func From[T any](v T, err error) gs.Try[T] {
 	return funcs.BuildWithErr(v, err, gs.Failure[T], gs.Success[T])
 }
 
+// FromWithBool is a Try builder returns Success with given v if ok is true,
+// otherwise returns Failure with ErrUnsatisfied.
 func FromWithBool[T any](v T, ok bool) gs.Try[T] {
 	return From(v, funcs.Cond(ok, nil, gs.ErrUnsatisfied))
 }
 
+// -----------------------------------------------------------------------------
+
+// TODO: refactor following functions to methods when go 1.19 releases.
+
+// Fold retuns result applying given succ function to successful value if given t is a Success,
+// otherwise applying given fail function to failed value from t.
 func Fold[T, R any](t gs.Try[T],
 	fail funcs.Func[error, R], succ funcs.Func[T, R]) R {
 

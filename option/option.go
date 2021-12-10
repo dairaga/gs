@@ -31,6 +31,10 @@ func Unless[T any](p funcs.Condition, z T) gs.Option[T] {
 	return From(z, !p())
 }
 
+// -----------------------------------------------------------------------------
+
+// TODO: refactor following functions to methods when go 1.19 releases.
+
 func Fold[T, R any](o gs.Option[T], z R, succ funcs.Func[T, R]) R {
 	return funcs.BuildUnit(o.Fetch, funcs.Id(z), succ)
 }
