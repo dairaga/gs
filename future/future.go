@@ -109,14 +109,13 @@ func (f *F[T]) Result(ctx context.Context, atMost time.Duration) gs.Try[T] {
 
 func (f *F[T]) Filter(ctx context.Context, p funcs.Predict[T]) gs.Future[T] {
 	return TransformWith[T](ctx, f, func(x gs.Try[T]) gs.Future[T] {
-		return promise[T](ctx).
-			assign(
-				funcs.Cond(
-					x.IsFailure() || p(x.Success()),
-					x,
-					gs.Failure[T](gs.ErrUnsatisfied),
-				),
-			)
+		return promise[T](ctx).assign(
+			funcs.Cond(
+				x.IsFailure() || p(x.Success()),
+				x,
+				gs.Failure[T](gs.ErrUnsatisfied),
+			),
+		)
 	})
 }
 
@@ -133,7 +132,7 @@ func promise[T any](parent context.Context) *F[T] {
 func Run[T any](parent context.Context, op func() T) gs.Future[T] {
 	ret := promise[T](parent)
 
-	go func(f *F[T]) {
+	go func(op func() T, f *F[T]) {
 		defer func() {
 			if r := recover(); r != nil {
 				switch v := r.(type) {
@@ -148,7 +147,7 @@ func Run[T any](parent context.Context, op func() T) gs.Future[T] {
 		}()
 
 		f.result = gs.Success(op())
-	}(ret)
+	}(op, ret)
 
 	return ret
 }
@@ -168,7 +167,7 @@ func Try[T any](parent context.Context, op func() (T, error)) gs.Future[T] {
 func Transform[T, U any](ctx context.Context, f gs.Future[T], op func(gs.Try[T]) gs.Try[U]) gs.Future[U] {
 	ret := promise[U](ctx)
 
-	go func() {
+	go func(ctx context.Context, f gs.Future[T], op func(gs.Try[T]) gs.Try[U], ret *F[U]) {
 		select {
 		case <-f.Done():
 			result, completed := f.Get()
@@ -179,7 +178,7 @@ func Transform[T, U any](ctx context.Context, f gs.Future[T], op func(gs.Try[T])
 		case <-ret.Done():
 		}
 		ret.cancel()
-	}()
+	}(ctx, f, op, ret)
 
 	return ret
 }
@@ -187,7 +186,7 @@ func Transform[T, U any](ctx context.Context, f gs.Future[T], op func(gs.Try[T])
 func TransformWith[T, U any](ctx context.Context, f gs.Future[T], op func(gs.Try[T]) gs.Future[U]) gs.Future[U] {
 	ret := promise[U](ctx)
 
-	go func() {
+	go func(ctx context.Context, f gs.Future[T], op func(gs.Try[T]) gs.Future[U], ret *F[U]) {
 		select {
 		case <-f.Done():
 			fresult, fcompleted := f.Get()
@@ -209,7 +208,7 @@ func TransformWith[T, U any](ctx context.Context, f gs.Future[T], op func(gs.Try
 		case <-ret.Done():
 			ret.cancel()
 		}
-	}()
+	}(ctx, f, op, ret)
 
 	return ret
 }
