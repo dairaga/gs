@@ -35,10 +35,8 @@ func (f Fetcher[T]) GetOrElse(z T) T {
 }
 
 // BuildWithErr builds object R from given v and err.
-// Apply given constructor succ to value v if err is nil,
-// or apply given fail to err.
-func BuildWithErr[T, R any](v T, err error,
-	fail Func[error, R], succ Func[T, R]) R {
+// Apply given constructor succ to value v if err is nil, or apply given fail to err.
+func BuildWithErr[T, R any](v T, err error, fail Func[error, R], succ Func[T, R]) R {
 
 	if err == nil {
 		return succ(v)
@@ -51,16 +49,14 @@ func BuildWithErr[T, R any](v T, err error,
 // TODO: refactor following functions to methods when go 1.19 releases.
 
 // Build builds object R from given Fetcher f.
-// Apply given constructor succ to successful result from Fetcher f,
-// or apply given fail to error from f.
+// Apply given constructor succ to successful result from Fetcher f, or apply given fail to error from f.
 func Build[T, R any](f Fetcher[T], fail Func[error, R], succ Func[T, R]) R {
 	v, err := f()
 	return BuildWithErr(v, err, fail, succ)
 }
 
 // BuildUnit builds R from given Fetcher f.
-// Apply given constructor succ to successful result from Fetcher f,
-// or invoke given fail to generate R.
+// Apply given constructor succ to successful result from Fetcher f, or invoke given fail to generate R.
 func BuildUnit[T, R any](f Fetcher[T], fail Unit[R], succ Func[T, R]) R {
 	if v, err := f(); err == nil {
 		return succ(v)

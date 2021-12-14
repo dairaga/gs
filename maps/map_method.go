@@ -115,7 +115,11 @@ func (m M[K, V]) Partition(p func(K, V) bool) (_, _ M[K, V]) {
 	t2 := Fold(
 		m,
 		gs.T2(make(M[K, V]), make(M[K, V])),
-		func(z gs.Tuple2[M[K, V], M[K, V]], k K, v V) gs.Tuple2[M[K, V], M[K, V]] {
+		func(
+			z gs.Tuple2[M[K, V], M[K, V]],
+			k K,
+			v V) gs.Tuple2[M[K, V], M[K, V]] {
+
 			if p(k, v) {
 				z.V2[k] = v
 			} else {

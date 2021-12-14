@@ -1,4 +1,4 @@
 /*
-Package either includes methods of Either, but implement them with functions because Go 1.18 does not support type parameters in methods.
+Package either includes methods of Either but implements them with functions.
 */
 package either

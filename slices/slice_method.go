@@ -12,10 +12,12 @@ import (
 	"github.com/dairaga/gs/funcs"
 )
 
+// IsEmpty returns true if this is an empty slice.
 func (s S[T]) IsEmpty() bool {
 	return len(s) <= 0
 }
 
+// Clone returns a new copy from this.
 func (s S[T]) Clone() S[T] {
 	if len(s) <= 0 {
 		return Empty[T]()
@@ -24,6 +26,7 @@ func (s S[T]) Clone() S[T] {
 	return append(Empty[T](), s...)
 }
 
+// ReverseSelf reverses this slice.
 func (s S[T]) ReverseSelf() S[T] {
 	size := len(s)
 	half := size / 2
@@ -37,25 +40,27 @@ func (s S[T]) ReverseSelf() S[T] {
 	return s
 }
 
+// Reverse returns a new reversed slice.
 func (s S[T]) Reverse() S[T] {
 	ret := s.Clone()
 	return ret.ReverseSelf()
 }
 
-func (s S[T]) IndexWhereFrom(p funcs.Predict[T], from int) int {
+// IndexWhereFrom returns index of the first element that satisfies given function p after or at given start index.
+func (s S[T]) IndexWhereFrom(p funcs.Predict[T], start int) int {
 	size := len(s)
 	if size <= 0 {
 		return -1
 	}
 
-	if from < 0 {
-		from = size + from
+	if start < 0 {
+		start = size + start
 	}
 
-	from = funcs.Min(from, size-1)
-	from = funcs.Max(0, from)
+	start = funcs.Min(start, size-1)
+	start = funcs.Max(0, start)
 
-	for i := from; i < size; i++ {
+	for i := start; i < size; i++ {
 		if p(s[i]) {
 			return i
 		}
@@ -63,24 +68,26 @@ func (s S[T]) IndexWhereFrom(p funcs.Predict[T], from int) int {
 	return -1
 }
 
+// IndexWhere returns index of the first element that satisfies given function p.
 func (s S[T]) IndexWhere(p funcs.Predict[T]) int {
 	return s.IndexWhereFrom(p, 0)
 }
 
-func (s S[T]) LastIndexWhereFrom(p funcs.Predict[T], from int) int {
+// LastIndexWhereFrom returns index of the last element that satisfies given function p before or at given end index.
+func (s S[T]) LastIndexWhereFrom(p funcs.Predict[T], end int) int {
 	size := len(s)
 	if size <= 0 {
 		return -1
 	}
 
-	if from < 0 {
-		from = size + from
+	if end < 0 {
+		end = size + end
 	}
 
-	from = funcs.Min(from, size-1)
-	from = funcs.Max(0, from)
+	end = funcs.Min(end, size-1)
+	end = funcs.Max(0, end)
 
-	for i := from; i >= 0; i-- {
+	for i := end; i >= 0; i-- {
 		if p(s[i]) {
 			return i
 		}
@@ -88,6 +95,7 @@ func (s S[T]) LastIndexWhereFrom(p funcs.Predict[T], from int) int {
 	return -1
 }
 
+// LastIndexWhere returns index of last element satisfying given function p.
 func (s S[T]) LastIndexWhere(p funcs.Predict[T]) int {
 	return s.LastIndexWhereFrom(p, -1)
 }

@@ -28,29 +28,24 @@ type Future[T any] interface {
 	// Get returns result and true in ok if goroutine is completed.
 	Get() (result Try[T], ok bool)
 
-	// OnSuccess applies given function p when goroutine is completed,
-	// and result is a Success.
+	// OnSuccess applies given function p when goroutine is completed, and result is a Success.
 	OnSuccess(p func(T))
 
-	// OnError applies given function p when goroutine is completed,
-	// and result is a Failure.
+	// OnError applies given function p when goroutine is completed, and result is a Failure.
 	OnError(p func(error))
 
-	// OnCompleted always applies given function p when goroutine is completed,
-	// even giving a function to OnSuccess or OnError.
+	// OnCompleted always applies given function p when goroutine is completed, even giving a function to OnSuccess or OnError.
 	OnCompleted(p func(Try[T]))
 
 	// Forall applies given function p to value from Success result.
 	Foreach(op func(T))
 
 	// Filter returns a new Future to wait this and apply result to given function p.
-	// Returned Future contains result from this if result is Failure or satisfies given function p,
-	// or contains Failure with ErrUnsatisfied.
+	// Returned Future contains result from this if result is Failure or satisfies given function p, or contains Failure with ErrUnsatisfied.
 	Filter(ctx context.Context, p funcs.Predict[T]) Future[T]
 
 	// FilterNot returns a new Future to wait this and apply result to given function p.
-	// Returned Future contains result from this if result is Failure or dose not satisfies given function p,
-	// or contains Failure with ErrUnsatisfied.
+	// Returned Future contains result from this if result is Failure or dose not satisfies given function p, or contains Failure with ErrUnsatisfied.
 	FilterNot(context.Context, funcs.Predict[T]) Future[T]
 
 	// Result waits result at most given time t.

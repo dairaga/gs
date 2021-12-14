@@ -189,7 +189,11 @@ func PartitionMap[K comparable, V, A, B any](
 	t2 := Fold(
 		m,
 		gs.T2(slices.Empty[A](), slices.Empty[B]()),
-		func(z gs.Tuple2[slices.S[A], slices.S[B]], k K, v V) gs.Tuple2[slices.S[A], slices.S[B]] {
+		func(
+			z gs.Tuple2[slices.S[A], slices.S[B]],
+			k K,
+			v V) gs.Tuple2[slices.S[A], slices.S[B]] {
+
 			e := op(k, v)
 			if e.IsRight() {
 				z.V2 = append(z.V2, e.Right())
