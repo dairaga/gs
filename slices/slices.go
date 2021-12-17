@@ -58,7 +58,7 @@ func Tabulate[T any](size int, op funcs.Func[int, T]) S[T] {
 
 // -----------------------------------------------------------------------------
 
-// TODO: refactor the method when go 1.19 releases.
+// TODO: refactor following functions to methods when go 1.19 releases.
 
 func IndexFromFunc[T, U any](s S[T], x U, from int, eq funcs.Equal[T, U]) int {
 	p := func(v T) bool {

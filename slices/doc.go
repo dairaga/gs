@@ -1,0 +1,4 @@
+/*
+aaa
+*/
+package slices

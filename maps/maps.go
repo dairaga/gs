@@ -37,7 +37,7 @@ func From[K comparable, V any](a ...Pair[K, V]) (ret M[K, V]) {
 
 // -----------------------------------------------------------------------------
 
-// TODO: refactor the method when go 1.19 releases.
+// TODO: refactor following functions to methods when go 1.19 releases.
 
 func Fold[K comparable, V, U any](m M[K, V], z U, op func(U, K, V) U) (ret U) {
 	ret = z
@@ -189,7 +189,11 @@ func PartitionMap[K comparable, V, A, B any](
 	t2 := Fold(
 		m,
 		gs.T2(slices.Empty[A](), slices.Empty[B]()),
-		func(z gs.Tuple2[slices.S[A], slices.S[B]], k K, v V) gs.Tuple2[slices.S[A], slices.S[B]] {
+		func(
+			z gs.Tuple2[slices.S[A], slices.S[B]],
+			k K,
+			v V) gs.Tuple2[slices.S[A], slices.S[B]] {
+
 			e := op(k, v)
 			if e.IsRight() {
 				z.V2 = append(z.V2, e.Right())

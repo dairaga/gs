@@ -11,13 +11,11 @@ import (
 	"github.com/dairaga/gs/funcs"
 )
 
-// Try is simplified Scala Try. Try like Either is either Success or Failure,
-// and Failure contains error value.
+// Try is simplified Scala Try. Try like Either is either Success or Failure, and Failure contains error value.
 type Try[T any] interface {
 	fmt.Stringer
 
-	// Fetch returns successful value and nil error if this is a Success,
-	// or v is zero value and err is from Failure.
+	// Fetch returns successful value and nil error if this is a Success, or v is zero value and err is from Failure.
 	Fetch() (v T, err error)
 
 	// Get returns successful value if Try is a Success, or panic.
@@ -38,21 +36,16 @@ type Try[T any] interface {
 	// Exists returns true if this is a Success and satisfies given function p.
 	Exists(p funcs.Predict[T]) bool
 
-	// Forall returns true if this is a Failure,
-	// or value from Success satisfies given function p.
+	// Forall returns true if this is a Failure, or value from Success satisfies given function p.
 	Forall(p funcs.Predict[T]) bool
 
 	// Foreach only applies given function op to value from Success.
 	Foreach(op func(T))
 
-	// Filter returns this if this is a Failure,
-	// or value from Success satisfies given function p,
-	// otherwise returns Failure with ErrUnsatisfied.
+	// Filter returns this if this is a Failure or value from Success satisfies given function p, otherwise returns Failure with ErrUnsatisfied.
 	Filter(p funcs.Predict[T]) Try[T]
 
-	// FilterNot returns this if this is a Failure,
-	// or value from Succes does not satisfy given function p,
-	// otherwise returns Failure with ErrUnsatisfied.
+	// FilterNot returns this if this is a Failure or value from Succes does not satisfy given function p, otherwise returns Failure with ErrUnsatisfied.
 	FilterNot(funcs.Predict[T]) Try[T]
 
 	// GetOrElse returns value from Success, or returns given z.
@@ -61,12 +54,10 @@ type Try[T any] interface {
 	// OrElse returns this if this is a Success, or return given z.
 	OrElse(z Try[T]) Try[T]
 
-	// Recover applies given function r if this is a Failure,
-	// or returns this if this is a Success.
+	// Recover applies given function r if this is a Failure, or returns this if this is a Success.
 	Recover(r funcs.Func[error, T]) Try[T]
 
-	// RecoverWith applies given function r if this is a Failure,
-	// or returns this if this is a Success.
+	// RecoverWith applies given function r if this is a Failure, or returns this if this is a Success.
 	RecoverWith(r funcs.Func[error, Try[T]]) Try[T]
 
 	// Either returns a Either with error type in Left side.

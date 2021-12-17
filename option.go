@@ -13,17 +13,15 @@ import (
 )
 
 // Option is simplified Scala Option. Option like Either is either Some or None.
-// Some means this has value; None means Nothing or Nil.
+// Some means this is defined and has a value; None means Nothing or Nil.
 // Suggest to return Option from function or method instead of nil.
 type Option[T any] interface {
 	fmt.Stringer
 
-	// Fetch returns value v from Some and err is nil if this is a Some,
-	// otherwise v is a zero value and err is ErrEmpty.
+	// Fetch returns value v from Some and err is nil if this is a Some, otherwise v is a zero value and err is ErrEmpty.
 	Fetch() (v T, err error)
 
-	// Check returns value v from Some and ok is true if this is a Some,
-	// otherwise v is a zero value and ok is false.
+	// Check returns value v from Some and ok is true if this is a Some, otherwise v is a zero value and ok is false.
 	Check() (v T, ok bool)
 
 	// Get returns value from Some, or panic.
@@ -48,8 +46,7 @@ type Option[T any] interface {
 	// otherwise returns None.
 	Filter(p funcs.Predict[T]) Option[T]
 
-	// FilterNot returns this if this is a None or value from Some satisfies given function p,
-	// otherwise returns None.
+	// FilterNot returns this if this is a None or value from Some satisfies given function p, otherwise returns None.
 	FilterNot(funcs.Predict[T]) Option[T]
 
 	// GetOrElse returns value from Some, or returns given z.
