@@ -72,14 +72,14 @@ func TestMapKeys(t *testing.T) {
 	m := maps.From(maps.P(1, "1"), maps.P(2, "2"), maps.P(3, "3"))
 
 	keys := m.Keys()
-	assert.Equal(t, slices.From(1, 2, 3), keys.Sort(funcs.Cmp[int]))
+	assert.Equal(t, slices.From(1, 2, 3), keys.Sort(funcs.Order[int]))
 }
 
 func TestMapValues(t *testing.T) {
 	m := maps.From(maps.P(1, "1"), maps.P(2, "2"), maps.P(3, "3"))
 
 	values := m.Values()
-	assert.Equal(t, slices.From("1", "2", "3"), values.Sort(funcs.Cmp[string]))
+	assert.Equal(t, slices.From("1", "2", "3"), values.Sort(funcs.Order[string]))
 }
 
 func TestMapAdd(t *testing.T) {
@@ -206,7 +206,7 @@ func TestFold(t *testing.T) {
 
 	assert.Equal(t,
 		slices.From("11", "22", "33", "44", "55", "66", "77", "88", "99"),
-		s.Sort(funcs.Cmp[string]),
+		s.Sort(funcs.Order[string]),
 	)
 }
 
@@ -217,7 +217,7 @@ func TestCollect(t *testing.T) {
 
 	assert.Equal(t,
 		slices.From("22", "44", "66", "88"),
-		s.Sort(funcs.Cmp[string]),
+		s.Sort(funcs.Order[string]),
 	)
 }
 
@@ -243,7 +243,7 @@ func TestFlatMapSlice(t *testing.T) {
 
 	assert.Equal(t,
 		slices.From("11", "22", "33", "44", "55", "66", "77", "88", "99"),
-		s.Sort(funcs.Cmp[string]),
+		s.Sort(funcs.Order[string]),
 	)
 }
 
@@ -264,7 +264,7 @@ func TestMapSlice(t *testing.T) {
 
 	assert.Equal(t,
 		slices.From("11", "22", "33", "44", "55", "66", "77", "88", "99"),
-		s.Sort(funcs.Cmp[string]),
+		s.Sort(funcs.Order[string]),
 	)
 }
 
@@ -286,14 +286,14 @@ func TestGroupMap(t *testing.T) {
 	)
 
 	m.Foreach(func(_ bool, v slices.S[string]) {
-		v = v.Sort(funcs.Cmp[string])
+		v = v.Sort(funcs.Order[string])
 	})
 
 	odds := slices.Map(oddM.Values(), func(v string) string { return v + v })
-	odds = odds.Sort(funcs.Cmp[string])
+	odds = odds.Sort(funcs.Order[string])
 
 	evens := slices.Map(evenM.Values(), func(v string) string { return v + v })
-	evens = evens.Sort(funcs.Cmp[string])
+	evens = evens.Sort(funcs.Order[string])
 
 	assertMap(t, maps.From(maps.P(true, odds), maps.P(false, evens)), m)
 }
@@ -335,13 +335,13 @@ func TestPartitionMap(t *testing.T) {
 	assert.Equal(
 		t,
 		slices.From(2, 4, 6, 8),
-		a.Sort(funcs.Cmp[int]),
+		a.Sort(funcs.Order[int]),
 	)
 
 	assert.Equal(
 		t,
 		slices.From("1", "3", "5", "7", "9"),
-		b.Sort(funcs.Cmp[string]),
+		b.Sort(funcs.Order[string]),
 	)
 }
 

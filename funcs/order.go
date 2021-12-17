@@ -16,9 +16,9 @@ type Orderize[T any, R constraints.Ordered] func(T) R
 // Equal is a function to check two elements is equal.
 type Equal[T, U any] func(T, U) bool
 
-// Cmp compares two ordered value and returns 1 if given a is larger than b,
+// Order compares two ordered value and returns 1 if given a is larger than b,
 // or returns -1 if a is less than b, otherwise returns 0.
-func Cmp[T constraints.Ordered](a, b T) int {
+func Order[T constraints.Ordered](a, b T) int {
 	switch {
 	case a > b:
 		return 1

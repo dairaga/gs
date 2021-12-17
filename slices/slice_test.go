@@ -330,21 +330,21 @@ func TestSliceReduceRight(t *testing.T) {
 func TestSliceMax(t *testing.T) {
 	s := slices.From(1, 3, 5, 7, 9, 2, 4, 6, 8)
 
-	assert.Equal(t, 9, s.Max(funcs.Cmp[int]).Get())
-	assert.False(t, slices.Empty[int]().Max(funcs.Cmp[int]).IsDefined())
+	assert.Equal(t, 9, s.Max(funcs.Order[int]).Get())
+	assert.False(t, slices.Empty[int]().Max(funcs.Order[int]).IsDefined())
 }
 
 func TestSliceMin(t *testing.T) {
 	s := slices.From(1, 3, 5, 7, 9, 2, 4, 6, 8)
-	assert.Equal(t, 1, s.Min(funcs.Cmp[int]).Get())
-	assert.False(t, slices.Empty[int]().Max(funcs.Cmp[int]).IsDefined())
+	assert.Equal(t, 1, s.Min(funcs.Order[int]).Get())
+	assert.False(t, slices.Empty[int]().Max(funcs.Order[int]).IsDefined())
 }
 
 func TestSliceSort(t *testing.T) {
 	s := slices.From(1, 3, 5, 7, 9, 2, 4, 6, 8)
 	assert.Equal(t,
 		slices.From(1, 2, 3, 4, 5, 6, 7, 8, 9),
-		s.Sort(funcs.Cmp[int]),
+		s.Sort(funcs.Order[int]),
 	)
 }
 
