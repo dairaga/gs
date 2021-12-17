@@ -251,15 +251,15 @@ func GroupMapReduce[T any, K comparable, V any](s S[T], key funcs.Func[T, K], va
 	return ret
 }
 
-func MaxBy[T any, R constraints.Ordered](s S[T], op funcs.Order[T, R]) gs.Option[T] {
+func MaxBy[T any, R constraints.Ordered](s S[T], op funcs.Orderize[T, R]) gs.Option[T] {
 	return s.Max(func(a, b T) int { return funcs.Cmp(op(a), op(b)) })
 }
 
-func MinBy[T any, R constraints.Ordered](s S[T], op funcs.Order[T, R]) gs.Option[T] {
+func MinBy[T any, R constraints.Ordered](s S[T], op funcs.Orderize[T, R]) gs.Option[T] {
 	return s.Min(func(a, b T) int { return funcs.Cmp(op(a), op(b)) })
 }
 
-func SortBy[T any, R constraints.Ordered](s S[T], op funcs.Order[T, R]) S[T] {
+func SortBy[T any, R constraints.Ordered](s S[T], op funcs.Orderize[T, R]) S[T] {
 	return s.Sort(func(a, b T) int {
 		return funcs.Cmp(op(a), op(b))
 	})

@@ -207,9 +207,7 @@ func PartitionMap[K comparable, V, A, B any](
 	return t2.V1, t2.V2
 }
 
-func MaxBy[K comparable, V any, B constraints.Ordered](
-	m M[K, V],
-	op func(K, V) B) gs.Option[Pair[K, V]] {
+func MaxBy[K comparable, V any, B constraints.Ordered](m M[K, V], op func(K, V) B) gs.Option[Pair[K, V]] {
 
 	return slices.MaxBy(
 		m.Slice(),

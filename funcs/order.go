@@ -7,11 +7,11 @@ package funcs
 
 import "constraints"
 
-// Compare is a function to compare two element.
-type Compare[T, U any] func(T, U) int
+// Ordering is a function to find ordering relation of two elements.
+type Ordering[T, U any] func(T, U) int
 
-// Order is a function to convert unordered value to ordered one.
-type Order[T any, R constraints.Ordered] func(T) R
+// Orderize is a function to convert unordered value to ordered one.
+type Orderize[T any, R constraints.Ordered] func(T) R
 
 // Equal is a function to check two elements is equal.
 type Equal[T, U any] func(T, U) bool
