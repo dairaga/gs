@@ -234,8 +234,8 @@ func TryMap[T, U any](ctx context.Context, f gs.Future[T], op funcs.Try[T, U]) g
 	})
 }
 
-func CanMap[T, U any](ctx context.Context, f gs.Future[T], op funcs.Can[T, U]) gs.Future[U] {
+func PartialMap[T, U any](ctx context.Context, f gs.Future[T], op funcs.Partial[T, U]) gs.Future[U] {
 	return Transform(ctx, f, func(x gs.Try[T]) gs.Try[U] {
-		return try.CanMap(x, op)
+		return try.PartialMap(x, op)
 	})
 }

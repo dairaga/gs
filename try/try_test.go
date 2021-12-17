@@ -109,16 +109,16 @@ func TestTryMap(t *testing.T) {
 	)
 }
 
-func TestCanMap(t *testing.T) {
+func TestPartialMap(t *testing.T) {
 	op := func(s string) (int, bool) {
 		a, err := strconv.Atoi(s)
 		return a, err == nil
 	}
 
-	assertTry(t, gs.Success(1), try.CanMap(gs.Success("1"), op))
+	assertTry(t, gs.Success(1), try.PartialMap(gs.Success("1"), op))
 	assertTry(t,
 		gs.Failure[int](gs.ErrEmpty),
-		try.CanMap(gs.Failure[string](gs.ErrEmpty), op),
+		try.PartialMap(gs.Failure[string](gs.ErrEmpty), op),
 	)
 }
 

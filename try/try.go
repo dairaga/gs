@@ -49,13 +49,13 @@ func TryMap[T, R any](t gs.Try[T], op funcs.Try[T, R]) gs.Try[R] {
 	return funcs.Build(t.Fetch, gs.Failure[R], funcs.TryRecover(op, From[R]))
 }
 
-// CanMap returns a Success if successful value from t satifies given function p, or return a Failure wiht ErrUnsatisfied.
+// PartialMap returns a Success if successful value from t satifies given function p, or return a Failure wiht ErrUnsatisfied.
 // Otherwise, returns Failure with failed value from t.
-func CanMap[T, R any](t gs.Try[T], p funcs.Can[T, R]) gs.Try[R] {
+func PartialMap[T, R any](t gs.Try[T], p funcs.Partial[T, R]) gs.Try[R] {
 	return funcs.Build(
 		t.Fetch,
 		gs.Failure[R],
-		funcs.CanTransform(p, FromWithBool[R]),
+		funcs.PartialTransform(p, FromWithBool[R]),
 	)
 }
 

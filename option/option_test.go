@@ -79,16 +79,16 @@ func TestMap(t *testing.T) {
 	assertOption(t, gs.None[string](), option.Map(gs.None[int](), strconv.Itoa))
 }
 
-func TestCankMap(t *testing.T) {
+func TestPartialMap(t *testing.T) {
 	op := func(s string) (int, bool) {
 		v, err := strconv.Atoi(s)
 		return v, err == nil
 	}
 
-	opt := option.CanMap(gs.Some("1"), op)
+	opt := option.PartialMap(gs.Some("1"), op)
 	assertOption(t, gs.Some(1), opt)
 
-	opt = option.CanMap(gs.Some("abc"), op)
+	opt = option.PartialMap(gs.Some("abc"), op)
 	assertOption(t, gs.None[int](), opt)
 
 }

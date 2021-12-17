@@ -17,8 +17,8 @@ type Unit[R any] func() R
 // Condition is a function (f:empty -> bool) mapping to true or false from empty set.
 type Condition func() bool
 
-// Can is a function (f:T -> (R, bool)) converts to R from T, or not.
-type Can[T, R any] func(T) (R, bool)
+// Partial is a function (f:T -> (R, bool)) converts partial value in T to R.
+type Partial[T, R any] func(T) (R, bool)
 
 // Try is a function (f:T -> (R, error)) transfers to R from T, and maybe error returned.
 type Try[T, R any] func(T) (r R, err error)
@@ -73,8 +73,8 @@ func ComposeUnit[T, R any](f Func[T, R], g Unit[T]) Unit[R] {
 	}
 }
 
-// CanTransform returns a new function (f:T -> R) applying given Transform f2 to result from f1.
-func CanTransform[T, U, R any](f1 Can[T, U], f2 Transform[U, R]) Func[T, R] {
+// PartialTransform returns a new function (f:T -> R) applying given Transform f2 to result from f1.
+func PartialTransform[T, U, R any](f1 Partial[T, U], f2 Transform[U, R]) Func[T, R] {
 	return func(v T) R {
 		return f2(f1(v))
 	}

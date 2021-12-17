@@ -43,8 +43,8 @@ func Fold[T, R any](o gs.Option[T], z R, succ funcs.Func[T, R]) R {
 }
 
 // Collect returns a Some with result from applying given function p if o is defined and value of o satifies p, or returns a None.
-func Collect[T, R any](o gs.Option[T], p funcs.Can[T, R]) gs.Option[R] {
-	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.CanTransform(p, From[R]))
+func Collect[T, R any](o gs.Option[T], p funcs.Partial[T, R]) gs.Option[R] {
+	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.PartialTransform(p, From[R]))
 }
 
 // FlatMap returns result from applying given function op if o is defined, or returns a None.
@@ -57,9 +57,9 @@ func Map[T, R any](o gs.Option[T], op funcs.Func[T, R]) gs.Option[R] {
 	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.AndThen(op, gs.Some[R]))
 }
 
-// CanMap returns a Some with result from applying given function op if o is defined and satisfies op, or returns a None.
-func CanMap[T, R any](o gs.Option[T], op funcs.Can[T, R]) gs.Option[R] {
-	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.CanTransform(op, From[R]))
+// PartialMap returns a Some with result from applying given function op if o is defined and satisfies op, or returns a None.
+func PartialMap[T, R any](o gs.Option[T], op funcs.Partial[T, R]) gs.Option[R] {
+	return funcs.BuildUnit(o.Fetch, gs.None[R], funcs.PartialTransform(op, From[R]))
 }
 
 // TryMap returns a Some with result from applying given function op if o is defined and converts to R successfully, or returns a None.

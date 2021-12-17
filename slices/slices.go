@@ -14,18 +14,22 @@ import (
 
 type S[T any] []T
 
+// Empty returns an empty slice.
 func Empty[T any]() S[T] {
 	return []T{}
 }
 
+// One returns an one element slice.
 func One[T any](v T) S[T] {
 	return []T{v}
 }
 
+// From returns a slice from given elements.
 func From[T any](a ...T) S[T] {
 	return a
 }
 
+// Fill returns a s
 func Fill[T any](size int, v T) S[T] {
 	ret := make([]T, size)
 	for i := range ret {
@@ -128,7 +132,7 @@ func Equal[T comparable](s1 S[T], s2 S[T]) bool {
 	return EqualFunc(s1, s2, func(a, b T) bool { return a == b })
 }
 
-func Collect[T, U any](s S[T], p funcs.Can[T, U]) S[U] {
+func Collect[T, U any](s S[T], p funcs.Partial[T, U]) S[U] {
 	return Fold(
 		s,
 		Empty[U](),
@@ -141,7 +145,7 @@ func Collect[T, U any](s S[T], p funcs.Can[T, U]) S[U] {
 	)
 }
 
-func CollectFirst[T, U any](s S[T], p funcs.Can[T, U]) gs.Option[U] {
+func CollectFirst[T, U any](s S[T], p funcs.Partial[T, U]) gs.Option[U] {
 	for i := range s {
 		if u, ok := p(s[i]); ok {
 			return gs.Some(u)
