@@ -37,9 +37,6 @@ type Future[T any] interface {
 	// OnCompleted always applies given function p when goroutine is completed, even giving a function to OnSuccess or OnError.
 	OnCompleted(p func(Try[T]))
 
-	// Forall applies given function p to value from Success result.
-	Foreach(op func(T))
-
 	// Filter returns a new Future to wait this and apply result to given function p.
 	// Returned Future contains result from this if result is Failure or satisfies given function p, or contains Failure with ErrUnsatisfied.
 	Filter(ctx context.Context, p funcs.Predict[T]) Future[T]

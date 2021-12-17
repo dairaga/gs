@@ -17,6 +17,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func assertResult[T any](t *testing.T, a, b gs.Try[T]) {
+	t.Helper()
+
+	assert.Equal(t, a.IsSuccess(), b.IsSuccess())
+
+	if a.IsSuccess() {
+		assert.Equal(t, a.Success(), b.Success())
+	}
+
+	if a.IsFailure() {
+		assert.True(t, errors.Is(a.Failed(), b.Failed()))
+	}
+}
+
 func TestRun(t *testing.T) {
 	run := func() int {
 		return 0
@@ -46,7 +60,7 @@ func TestRun(t *testing.T) {
 	t.Log(f)
 	result, completed = f.Get()
 	assert.False(t, completed)
-	assert.Nil(t, result)
+	assertResult(t, future.Failure[int](), result)
 
 	run = func() int {
 		panic(gs.ErrEmpty)
@@ -170,6 +184,14 @@ func TestResult(t *testing.T) {
 	result = f.Result(context.Background(), time.Second)
 	assert.True(t, result.IsFailure())
 	assert.True(t, errors.Is(context.DeadlineExceeded, result.Failed()))
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	f = future.Run(ctx, run)
+	result = f.Result(context.Background(), 10*time.Second)
+	cancel()
+	assert.True(t, result.IsFailure())
+	assert.True(t, errors.Is(context.DeadlineExceeded, result.Failed()))
+
 }
 
 func TestFilter(t *testing.T) {
@@ -199,6 +221,26 @@ func TestFilter(t *testing.T) {
 	result = h.Result(context.Background(), 5*time.Second)
 	assert.True(t, errors.Is(gs.ErrUnsatisfied, result.Failed()))
 
+}
+
+func TestFilterNot(t *testing.T) {
+	p1 := func(a int) bool {
+		return (a % 2) == 1
+	}
+
+	p2 := func(a int) bool {
+		return (a % 2) == 0
+	}
+
+	f := future.Run(context.Background(), funcs.Id(5))
+	g := f.FilterNot(context.Background(), p1)
+	h := f.FilterNot(context.Background(), p2)
+
+	result := g.Result(context.Background(), 5*time.Second)
+	assert.True(t, errors.Is(gs.ErrUnsatisfied, result.Failed()))
+
+	result = h.Result(context.Background(), 5*time.Second)
+	assert.Equal(t, 5, result.Get())
 }
 
 func TestFlatAndMap(t *testing.T) {
@@ -240,4 +282,73 @@ func TestFlatAndMap(t *testing.T) {
 	)
 
 	assert.True(t, errors.Is(gs.ErrUnsatisfied, h.Wait().Failed()))
+}
+
+func TestZip(t *testing.T) {
+	f := future.Run(context.Background(), func() int {
+		time.Sleep(2 * time.Second)
+		return 1
+	})
+
+	g := future.Run(context.Background(), func() string {
+		time.Sleep(5 * time.Second)
+		return "hello"
+	})
+
+	h := future.Zip(context.Background(), f, g)
+	result := h.Wait()
+
+	assert.True(t, result.IsSuccess())
+	assert.Equal(t, result.Success().V1.Success(), 1)
+	assert.Equal(t, result.Success().V2.Success(), "hello")
+
+	f = future.Run(context.Background(), func() int {
+		time.Sleep(5 * time.Second)
+		return 1
+	})
+
+	g = future.Run(context.Background(), func() string {
+		time.Sleep(2 * time.Second)
+		return "hello"
+	})
+
+	assert.True(t, result.IsSuccess())
+	assert.Equal(t, result.Success().V1.Success(), 1)
+	assert.Equal(t, result.Success().V2.Success(), "hello")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	h = future.Zip(ctx, f, g)
+	result = h.Wait()
+	cancel()
+	assert.True(t, result.IsFailure())
+	assert.True(t, errors.Is(gs.ErrEmpty, result.Failed()))
+}
+
+func TestZipWith(t *testing.T) {
+	f := future.Run(context.Background(), func() int {
+		time.Sleep(2 * time.Second)
+		return 1
+	})
+
+	g := future.Run(context.Background(), func() string {
+		time.Sleep(5 * time.Second)
+		return "hello"
+	})
+
+	op := func(a gs.Try[int], b gs.Try[string]) gs.Try[string] {
+		if a.IsFailure() {
+			return gs.Failure[string](a.Failed())
+		}
+
+		if b.IsFailure() {
+			return gs.Failure[string](b.Failed())
+		}
+
+		return gs.Success("ok")
+	}
+
+	h := future.ZipWith(context.Background(), f, g, op)
+	result := h.Wait()
+
+	assertResult(t, gs.Success("ok"), result)
 }
