@@ -18,7 +18,17 @@ type Unit[R any] func() R
 type Condition func() bool
 
 // Partial is a function (f:T -> (R, bool)) converts partial value in T to R.
+// ParialFunc in Scala means that not all value in domain T can be applied.
+// ParialFunc has isDefinedAt method to verify given value is contained in function's domain.
 type Partial[T, R any] func(T) (R, bool)
+
+// ApplyOrElse returns result applying this to x if x is defined at its domain, or returns given default z.
+func (p Partial[T, R]) ApplyOrElse(x T, z R) R {
+	if v, ok := p(x); ok {
+		return v
+	}
+	return z
+}
 
 // Try is a function (f:T -> (R, error)) transfers to R from T, and maybe error returned.
 type Try[T, R any] func(T) (r R, err error)

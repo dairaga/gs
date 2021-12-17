@@ -38,3 +38,15 @@ func Max[T constraints.Ordered](a, b T) T {
 func Min[T constraints.Ordered](a, b T) T {
 	return Cond(a <= b, a, b)
 }
+
+// Same returns true if a is same to b.
+func Same[T comparable](a, b T) bool {
+	return a == b
+}
+
+// EqualTo returns a predict function to check value is equal to given value v.
+func EqualTo[T, U any](v U, eq Equal[T, U]) func(T) bool {
+	return func(t T) bool {
+		return eq(t, v)
+	}
+}

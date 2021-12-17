@@ -368,6 +368,18 @@ func TestFill(t *testing.T) {
 	assert.Equal(t, slices.From(1, 1, 1), s)
 }
 
+func TestFillWith(t *testing.T) {
+
+	count := 0
+	op := func() int {
+		count += 1
+		return count
+	}
+
+	s := slices.FillWith(3, op)
+	assert.Equal(t, slices.From(1, 2, 3), s)
+}
+
 func TestRange(t *testing.T) {
 	assert.Equal(t,
 		slices.From(0, 2, 4, 6, 8),

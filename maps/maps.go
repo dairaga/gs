@@ -14,6 +14,7 @@ import (
 
 type M[K comparable, V any] map[K]V
 
+// Pair is a 2 dimensional tuple contains key and value in map.
 type Pair[K comparable, V any] struct {
 	_     struct{}
 	Key   K
@@ -49,9 +50,7 @@ func Fold[K comparable, V, U any](m M[K, V], z U, op func(U, K, V) U) (ret U) {
 	return
 }
 
-func Collect[K comparable, V, T any](
-	m M[K, V],
-	p func(K, V) (T, bool)) slices.S[T] {
+func Collect[K comparable, V, T any](m M[K, V], p func(K, V) (T, bool)) slices.S[T] {
 
 	return Fold(
 		m,
@@ -65,9 +64,7 @@ func Collect[K comparable, V, T any](
 	)
 }
 
-func CollectMap[K1, K2 comparable, V1, V2 any](
-	m M[K1, V1],
-	p func(K1, V1) (K2, V2, bool)) M[K2, V2] {
+func CollectMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], p func(K1, V1) (K2, V2, bool)) M[K2, V2] {
 
 	return Fold(
 		m,
@@ -81,9 +78,7 @@ func CollectMap[K1, K2 comparable, V1, V2 any](
 	)
 }
 
-func FlatMapSlice[K comparable, V any, T any](
-	m M[K, V],
-	op func(K, V) slices.S[T]) slices.S[T] {
+func FlatMapSlice[K comparable, V any, T any](m M[K, V], op func(K, V) slices.S[T]) slices.S[T] {
 
 	return Fold(
 		m,
@@ -94,9 +89,7 @@ func FlatMapSlice[K comparable, V any, T any](
 	)
 }
 
-func FlatMap[K1, K2 comparable, V1, V2 any](m M[K1, V1],
-	op func(K1, V1) M[K2, V2]) M[K2, V2] {
-
+func FlatMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) M[K2, V2]) M[K2, V2] {
 	return Fold(
 		m,
 		make(M[K2, V2]),
@@ -116,10 +109,7 @@ func MapSlice[K comparable, V, T any](m M[K, V], op func(K, V) T) slices.S[T] {
 	)
 }
 
-func Map[K1, K2 comparable, V1, V2 any](
-	m M[K1, V1],
-	op func(K1, V1) (K2, V2)) M[K2, V2] {
-
+func Map[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) (K2, V2)) M[K2, V2] {
 	return Fold(
 		m,
 		make(M[K2, V2]),
@@ -129,11 +119,7 @@ func Map[K1, K2 comparable, V1, V2 any](
 	)
 }
 
-func GroupMap[K1, K2 comparable, V1, V2 any](
-	m M[K1, V1],
-	key func(K1, V1) K2,
-	val func(K1, V1) V2) M[K2, slices.S[V2]] {
-
+func GroupMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], key func(K1, V1) K2, val func(K1, V1) V2) M[K2, slices.S[V2]] {
 	return Fold(
 		m,
 		make(M[K2, slices.S[V2]]),
@@ -146,10 +132,7 @@ func GroupMap[K1, K2 comparable, V1, V2 any](
 	)
 }
 
-func GroupBy[K, K1 comparable, V any](
-	m M[K, V],
-	key func(K, V) K1) M[K1, M[K, V]] {
-
+func GroupBy[K, K1 comparable, V any](m M[K, V], key func(K, V) K1) M[K1, M[K, V]] {
 	return Fold(
 		m,
 		make(M[K1, M[K, V]]),
@@ -166,12 +149,7 @@ func GroupBy[K, K1 comparable, V any](
 	)
 }
 
-func GroupMapReduce[K1, K2 comparable, V1, V2 any](
-	m M[K1, V1],
-	key func(K1, V1) K2,
-	val func(K1, V1) V2,
-	op func(V2, V2) V2) M[K2, V2] {
-
+func GroupMapReduce[K1, K2 comparable, V1, V2 any](m M[K1, V1], key func(K1, V1) K2, val func(K1, V1) V2, op func(V2, V2) V2) M[K2, V2] {
 	return Fold(
 		GroupMap(m, key, val),
 		make(M[K2, V2]),
@@ -182,9 +160,7 @@ func GroupMapReduce[K1, K2 comparable, V1, V2 any](
 	)
 }
 
-func PartitionMap[K comparable, V, A, B any](
-	m M[K, V],
-	op func(K, V) gs.Either[A, B]) (slices.S[A], slices.S[B]) {
+func PartitionMap[K comparable, V, A, B any](m M[K, V], op func(K, V) gs.Either[A, B]) (slices.S[A], slices.S[B]) {
 
 	t2 := Fold(
 		m,
@@ -208,7 +184,6 @@ func PartitionMap[K comparable, V, A, B any](
 }
 
 func MaxBy[K comparable, V any, B constraints.Ordered](m M[K, V], op func(K, V) B) gs.Option[Pair[K, V]] {
-
 	return slices.MaxBy(
 		m.Slice(),
 		func(pair Pair[K, V]) B {
@@ -217,10 +192,7 @@ func MaxBy[K comparable, V any, B constraints.Ordered](m M[K, V], op func(K, V) 
 	)
 }
 
-func MinBy[K comparable, V any, B constraints.Ordered](
-	m M[K, V],
-	op func(K, V) B) gs.Option[Pair[K, V]] {
-
+func MinBy[K comparable, V any, B constraints.Ordered](m M[K, V], op func(K, V) B) gs.Option[Pair[K, V]] {
 	return slices.MinBy(
 		m.Slice(),
 		func(pair Pair[K, V]) B {
