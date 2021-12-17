@@ -150,7 +150,7 @@ func Equal[T comparable](s1 S[T], s2 S[T]) bool {
 	return EqualFunc(s1, s2, funcs.Same[T])
 }
 
-// Collect returns a new slice containing results applying given function p successfully.
+// Collect returns a new slice containing results applying given partial function p on which it is defined.
 func Collect[T, U any](s S[T], p funcs.Partial[T, U]) S[U] {
 	return Fold(
 		s,

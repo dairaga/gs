@@ -195,6 +195,32 @@ func TestFrom(t *testing.T) {
 	)
 }
 
+func TestZip(t *testing.T) {
+	assertMap(t,
+		map[int]string{1: "1", 2: "2", 3: "3"},
+		maps.Zip(
+			slices.From(1, 2, 3),
+			slices.From("1", "2", "3"),
+		),
+	)
+
+	assertMap(t,
+		map[int]string{1: "1", 2: "2", 3: "3"},
+		maps.Zip(
+			slices.From(1, 2, 3, 4),
+			slices.From("1", "2", "3"),
+		),
+	)
+
+	assertMap(t,
+		map[int]string{1: "1", 2: "2", 3: "3"},
+		maps.Zip(
+			slices.From(1, 2, 3),
+			slices.From("1", "2", "3", "4"),
+		),
+	)
+}
+
 func TestFold(t *testing.T) {
 	s := maps.Fold(
 		testM,
@@ -332,17 +358,10 @@ func TestPartitionMap(t *testing.T) {
 		},
 	)
 
-	assert.Equal(
-		t,
-		slices.From(2, 4, 6, 8),
-		a.Sort(funcs.Order[int]),
-	)
+	assertMap(t,
+		maps.From(maps.P(2, 2), maps.P(4, 4), maps.P(6, 6), maps.P(8, 8)), a)
 
-	assert.Equal(
-		t,
-		slices.From("1", "3", "5", "7", "9"),
-		b.Sort(funcs.Order[string]),
-	)
+	assertMap(t, oddM, b)
 }
 
 func TestMaxBy(t *testing.T) {

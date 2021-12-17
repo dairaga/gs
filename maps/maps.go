@@ -9,6 +9,7 @@ import (
 	"constraints"
 
 	"github.com/dairaga/gs"
+	"github.com/dairaga/gs/funcs"
 	"github.com/dairaga/gs/slices"
 )
 
@@ -21,6 +22,7 @@ type Pair[K comparable, V any] struct {
 	Value V
 }
 
+// P builds a pair from given key k, and value v.
 func P[K comparable, V any](k K, v V) Pair[K, V] {
 	return Pair[K, V]{
 		Key:   k,
@@ -28,6 +30,7 @@ func P[K comparable, V any](k K, v V) Pair[K, V] {
 	}
 }
 
+// Form builds a map from pairs.
 func From[K comparable, V any](a ...Pair[K, V]) (ret M[K, V]) {
 	ret = make(M[K, V], len(a))
 	for i := range a {
@@ -36,10 +39,22 @@ func From[K comparable, V any](a ...Pair[K, V]) (ret M[K, V]) {
 	return ret
 }
 
+// Zip combines given two slices into a map.
+func Zip[K comparable, V any](a slices.S[K], b slices.S[V]) (ret M[K, V]) {
+	size := funcs.Min(len(a), len(b))
+	ret = make(M[K, V], size)
+
+	for i := 0; i < size; i++ {
+		ret[a[i]] = b[i]
+	}
+	return ret
+}
+
 // -----------------------------------------------------------------------------
 
 // TODO: refactor following functions to methods when go 1.19 releases.
 
+// Fold applies given function op to a start value z and all elements of this map.
 func Fold[K comparable, V, U any](m M[K, V], z U, op func(U, K, V) U) (ret U) {
 	ret = z
 
@@ -50,6 +65,7 @@ func Fold[K comparable, V, U any](m M[K, V], z U, op func(U, K, V) U) (ret U) {
 	return
 }
 
+// Collect returns a new slice by applying a partial function p to all elements of map m on which it is defined. It might return different results for different runs.
 func Collect[K comparable, V, T any](m M[K, V], p func(K, V) (T, bool)) slices.S[T] {
 
 	return Fold(
@@ -64,6 +80,7 @@ func Collect[K comparable, V, T any](m M[K, V], p func(K, V) (T, bool)) slices.S
 	)
 }
 
+// CollectMap returns a new map by applying a partial function p to all elements of map m on which it is defined.
 func CollectMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], p func(K1, V1) (K2, V2, bool)) M[K2, V2] {
 
 	return Fold(
@@ -78,6 +95,7 @@ func CollectMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], p func(K1, V1) (K2, 
 	)
 }
 
+// FlatMapSlice returns a new slices by applying given function op to all elements of map m and merge results.
 func FlatMapSlice[K comparable, V any, T any](m M[K, V], op func(K, V) slices.S[T]) slices.S[T] {
 
 	return Fold(
@@ -89,6 +107,7 @@ func FlatMapSlice[K comparable, V any, T any](m M[K, V], op func(K, V) slices.S[
 	)
 }
 
+// FlatMap returns a new map by applying given function op to all elements of map m and merge results.
 func FlatMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) M[K2, V2]) M[K2, V2] {
 	return Fold(
 		m,
@@ -99,6 +118,7 @@ func FlatMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) M[K2, V
 	)
 }
 
+// MapSlice retuns a new slice by applying given function op to all elements of map m.
 func MapSlice[K comparable, V, T any](m M[K, V], op func(K, V) T) slices.S[T] {
 	return Fold(
 		m,
@@ -109,6 +129,7 @@ func MapSlice[K comparable, V, T any](m M[K, V], op func(K, V) T) slices.S[T] {
 	)
 }
 
+// Map retuns a new map by applying given function op to all elements of map m.
 func Map[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) (K2, V2)) M[K2, V2] {
 	return Fold(
 		m,
@@ -119,6 +140,7 @@ func Map[K1, K2 comparable, V1, V2 any](m M[K1, V1], op func(K1, V1) (K2, V2)) M
 	)
 }
 
+// GroupMap partitions map m into a map of maps according to a discriminator function key. Each element in a group is transformed into a value of type V2 using function val.
 func GroupMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], key func(K1, V1) K2, val func(K1, V1) V2) M[K2, slices.S[V2]] {
 	return Fold(
 		m,
@@ -132,6 +154,7 @@ func GroupMap[K1, K2 comparable, V1, V2 any](m M[K1, V1], key func(K1, V1) K2, v
 	)
 }
 
+// GroupBy partitions map m into a map of maps according to some discriminator function.
 func GroupBy[K, K1 comparable, V any](m M[K, V], key func(K, V) K1) M[K1, M[K, V]] {
 	return Fold(
 		m,
@@ -149,6 +172,7 @@ func GroupBy[K, K1 comparable, V any](m M[K, V], key func(K, V) K1) M[K1, M[K, V
 	)
 }
 
+// GroupMapReduce partitions map m into a map according to a discriminator function key. All the values that have the same discriminator are then transformed by the function val and then reduced into a single value with the reduce function op.
 func GroupMapReduce[K1, K2 comparable, V1, V2 any](m M[K1, V1], key func(K1, V1) K2, val func(K1, V1) V2, op func(V2, V2) V2) M[K2, V2] {
 	return Fold(
 		GroupMap(m, key, val),
@@ -160,21 +184,18 @@ func GroupMapReduce[K1, K2 comparable, V1, V2 any](m M[K1, V1], key func(K1, V1)
 	)
 }
 
-func PartitionMap[K comparable, V, A, B any](m M[K, V], op func(K, V) gs.Either[A, B]) (slices.S[A], slices.S[B]) {
+// PartitionMap applies given function op to each element of the map and returns a pair of maps: the first one made of those values returned by f that were wrapped in scala.util.Left, and the second one made of those wrapped in scala.util.Right.
+func PartitionMap[K comparable, V, A, B any](m M[K, V], op func(K, V) gs.Either[A, B]) (M[K, A], M[K, B]) {
 
 	t2 := Fold(
 		m,
-		gs.T2(slices.Empty[A](), slices.Empty[B]()),
-		func(
-			z gs.Tuple2[slices.S[A], slices.S[B]],
-			k K,
-			v V) gs.Tuple2[slices.S[A], slices.S[B]] {
-
+		gs.T2(make(M[K, A]), make(M[K, B])),
+		func(z gs.Tuple2[M[K, A], M[K, B]], k K, v V) gs.Tuple2[M[K, A], M[K, B]] {
 			e := op(k, v)
 			if e.IsRight() {
-				z.V2 = append(z.V2, e.Right())
+				z.V2[k] = e.Right()
 			} else {
-				z.V1 = append(z.V1, e.Left())
+				z.V1[k] = e.Left()
 			}
 			return z
 		},
@@ -183,6 +204,7 @@ func PartitionMap[K comparable, V, A, B any](m M[K, V], op func(K, V) gs.Either[
 	return t2.V1, t2.V2
 }
 
+// MaxBy returns a maximum pair of key and value according to result of ordering function op.
 func MaxBy[K comparable, V any, B constraints.Ordered](m M[K, V], op func(K, V) B) gs.Option[Pair[K, V]] {
 	return slices.MaxBy(
 		m.Slice(),
@@ -192,6 +214,7 @@ func MaxBy[K comparable, V any, B constraints.Ordered](m M[K, V], op func(K, V) 
 	)
 }
 
+// MinBy returns a minimum pair of key and value according to result of ordering function op.
 func MinBy[K comparable, V any, B constraints.Ordered](m M[K, V], op func(K, V) B) gs.Option[Pair[K, V]] {
 	return slices.MinBy(
 		m.Slice(),
